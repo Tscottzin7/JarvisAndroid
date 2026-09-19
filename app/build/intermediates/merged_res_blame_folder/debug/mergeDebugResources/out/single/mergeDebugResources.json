@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.jarvis.assistant.app-debug-38:/layout_activity_main.xml.flat",
+        "source": "com.jarvis.assistant.app-main-40:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.jarvis.assistant.app-debug-38:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.jarvis.assistant.app-main-40:/drawable/ic_launcher_foreground.xml"
+    }
+]

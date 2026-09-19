@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Jarvis Core Interface</title>
+
   <style>
     * {
       box-sizing: border-box;
@@ -76,7 +77,7 @@
       fill: currentColor;
     }
 
-    /* Esfera e Legendas */
+    /* Esfera */
     .orb-wrapper {
       flex: 1;
       display: flex;
@@ -92,7 +93,7 @@
       height: 270px;
       border-radius: 50%;
       position: relative;
-      box-shadow: 
+      box-shadow:
         0 0 50px rgba(0, 102, 255, 0.65),
         0 0 90px rgba(255, 0, 76, 0.55),
         0 0 140px rgba(0, 102, 255, 0.3);
@@ -115,15 +116,15 @@
       border-radius: 50%;
       pointer-events: none;
       border: 1.5px solid rgba(255, 255, 255, 0.35);
-      background: 
+      background:
         radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 45%),
         radial-gradient(circle at 75% 82%, rgba(255, 0, 76, 0.3) 0%, rgba(0, 0, 0, 0) 50%);
-      box-shadow: 
+      box-shadow:
         inset 0 3px 12px rgba(255, 255, 255, 0.6),
         inset 0 -8px 24px rgba(0, 0, 0, 0.7);
     }
 
-    /* Painel de Legendas Animadas */
+    /* Legendas */
     .subtitles-box {
       position: absolute;
       bottom: 25px;
@@ -165,6 +166,7 @@
         opacity: 0;
         transform: scale(0.95);
       }
+
       to {
         opacity: 1;
         transform: scale(1);
@@ -203,7 +205,7 @@
       font-weight: 400;
     }
 
-    /* Botão de Microfone */
+    /* Microfone */
     .mic-btn {
       width: 54px;
       height: 54px;
@@ -230,9 +232,17 @@
     }
 
     @keyframes pulseMic {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.08);
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     .close-btn {
@@ -246,420 +256,1532 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="app-screen">
+
     <header class="header">
-      <button class="icon-btn" id="btnMenu" aria-label="Menu">
-        <svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+
+      <button
+        class="icon-btn"
+        id="btnMenu"
+        aria-label="Menu"
+      >
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M4 9h16M4 15h16"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+          />
+        </svg>
       </button>
 
-      <button class="icon-btn" id="btnSettings" aria-label="Configurações">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="2.5"/><path d="M2 7h4.5M11.5 7H22"/><circle cx="15" cy="17" r="2.5"/><path d="M2 17h10.5M17.5 17H22"/></svg>
+      <button
+        class="icon-btn"
+        id="btnSettings"
+        aria-label="Configurações"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="9" cy="7" r="2.5" />
+          <path d="M2 7h4.5M11.5 7H22" />
+
+          <circle cx="15" cy="17" r="2.5" />
+          <path d="M2 17h10.5M17.5 17H22" />
+        </svg>
       </button>
+
     </header>
 
     <main class="orb-wrapper">
-      <div class="orb-container" id="orbContainer">
+
+      <div
+        class="orb-container"
+        id="orbContainer"
+      >
         <canvas id="smokeCanvas"></canvas>
         <div class="glass-reflection"></div>
       </div>
 
-      <!-- Caixa de Legendas -->
-      <div class="subtitles-box" id="subtitlesBox">
-        <span class="subtitles-text" id="subtitlesText"></span>
+      <div
+        class="subtitles-box"
+        id="subtitlesBox"
+      >
+        <span
+          class="subtitles-text"
+          id="subtitlesText"
+        ></span>
       </div>
+
     </main>
 
     <footer class="footer">
-      <div class="prompt-pill" id="promptPill">
-        <span class="placeholder-text" id="statusText">Jarvis Conectado</span>
+
+      <div
+        class="prompt-pill"
+        id="promptPill"
+      >
+        <span
+          class="placeholder-text"
+          id="statusText"
+        >
+          Jarvis Conectado
+        </span>
       </div>
 
-      <button class="mic-btn" id="micBtn" aria-label="Microfone">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      <button
+        class="mic-btn"
+        id="micBtn"
+        aria-label="Microfone"
+      >
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <line x1="12" y1="19" x2="12" y2="22" />
+        </svg>
       </button>
 
-      <button class="icon-btn close-btn" id="closeBtn" aria-label="Fechar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <button
+        class="icon-btn close-btn"
+        id="closeBtn"
+        aria-label="Fechar"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
       </button>
+
     </footer>
+
   </div>
 
   <script>
-    let ws;
-    const statusText = document.getElementById('statusText');
-    const micBtn = document.getElementById('micBtn');
-    const subtitlesBox = document.getElementById('subtitlesBox');
-    const subtitlesText = document.getElementById('subtitlesText');
-    
+
+    /* ============================================================
+       VARIÁVEIS PRINCIPAIS
+       ============================================================ */
+
+    let ws = null;
+
+    const statusText =
+      document.getElementById('statusText');
+
+    const micBtn =
+      document.getElementById('micBtn');
+
+    const subtitlesBox =
+      document.getElementById('subtitlesBox');
+
+    const subtitlesText =
+      document.getElementById('subtitlesText');
+
     let isListening = false;
-    let currentState = 'idle'; 
+
+    let currentState = 'idle';
+
     let subtitleTimer = null;
 
-    // Conexão WebSocket com o Jarvis Core Python
+
+    /* ============================================================
+       WEBSOCKET — JARVIS CORE PYTHON
+       ============================================================ */
+
     function connectWebSocket() {
-      ws = new WebSocket('ws://' + (window.location.hostname || 'localhost') + ':8765');
 
-      ws.onopen = () => {
-        statusText.innerText = "Jarvis Conectado";
-      };
+      try {
 
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === "state") {
-            setJarvisState(data.state, data.text);
+        const host =
+          window.location.hostname ||
+          '127.0.0.1';
+
+        ws =
+          new WebSocket(
+            'ws://' + host + ':8765'
+          );
+
+        ws.onopen = () => {
+
+          console.log(
+            '[Jarvis] WebSocket conectado.'
+          );
+
+          statusText.innerText =
+            'Jarvis Conectado';
+        };
+
+        ws.onmessage = (event) => {
+
+          try {
+
+            const data =
+              JSON.parse(event.data);
+
+            if (
+              data.type === 'state'
+            ) {
+
+              setJarvisState(
+                data.state,
+                data.text || ''
+              );
+            }
+
+          } catch (e) {
+
+            console.error(
+              '[Jarvis] Erro ao processar WebSocket:',
+              e
+            );
           }
-        } catch(e) {}
-      };
+        };
 
-      ws.onclose = () => {
-        statusText.innerText = "Reconectando Jarvis...";
-        setTimeout(connectWebSocket, 3000);
-      };
-    }
+        ws.onerror = (error) => {
 
-    function sendPrompt(text) {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'user_prompt', text: text }));
+          console.error(
+            '[Jarvis] Erro WebSocket:',
+            error
+          );
+        };
+
+        ws.onclose = () => {
+
+          console.log(
+            '[Jarvis] WebSocket desconectado.'
+          );
+
+          statusText.innerText =
+            'Reconectando Jarvis...';
+
+          setTimeout(
+            connectWebSocket,
+            3000
+          );
+        };
+
+      } catch (e) {
+
+        console.error(
+          '[Jarvis] Falha ao criar WebSocket:',
+          e
+        );
+
+        setTimeout(
+          connectWebSocket,
+          3000
+        );
       }
     }
 
-    // Gerenciador de Estados e Voz
-    function setJarvisState(state, text = '') {
-      currentState = state;
-      const orb = document.getElementById('orbContainer');
 
-      if (state === 'idle') {
-        statusText.innerText = "Falar com Jarvis...";
-        orb.style.boxShadow = "0 0 50px rgba(0, 102, 255, 0.65), 0 0 90px rgba(255, 0, 76, 0.55)";
-        micBtn.classList.remove('listening');
-      } else if (state === 'listening') {
-        statusText.innerText = "Ouvindo...";
-        orb.style.boxShadow = "0 0 70px rgba(0, 255, 128, 0.8), 0 0 110px rgba(0, 200, 255, 0.6)";
-        micBtn.classList.add('listening');
-      } else if (state === 'thinking') {
-        statusText.innerText = "Pensando...";
-        orb.style.boxShadow = "0 0 80px rgba(255, 180, 0, 0.8), 0 0 120px rgba(255, 0, 100, 0.6)";
-        micBtn.classList.remove('listening');
-      } else if (state === 'speaking') {
-        statusText.innerText = "Jarvis Falando...";
-        orb.style.boxShadow = "0 0 90px rgba(0, 150, 255, 0.9), 0 0 130px rgba(180, 0, 255, 0.7)";
-        micBtn.classList.remove('listening');
+    function sendPrompt(text) {
+
+      if (
+        !text ||
+        !text.trim()
+      ) {
+        return;
+      }
+
+      const cleanText =
+        text.trim();
+
+      console.log(
+        '[Jarvis] Enviando comando:',
+        cleanText
+      );
+
+      if (
+        ws &&
+        ws.readyState === WebSocket.OPEN
+      ) {
+
+        ws.send(
+          JSON.stringify({
+            type: 'user_prompt',
+            text: cleanText
+          })
+        );
+
+      } else {
+
+        console.warn(
+          '[Jarvis] WebSocket ainda não conectado.'
+        );
+
+        statusText.innerText =
+          'Jarvis Offline';
+      }
+    }
+
+
+    /* ============================================================
+       ESTADOS DA INTERFACE
+       ============================================================ */
+
+    function setJarvisState(
+      state,
+      text = ''
+    ) {
+
+      currentState =
+        state;
+
+      const orb =
+        document.getElementById(
+          'orbContainer'
+        );
+
+      if (
+        state === 'idle'
+      ) {
+
+        statusText.innerText =
+          'Falar com Jarvis...';
+
+        orb.style.boxShadow =
+          '0 0 50px rgba(0, 102, 255, 0.65), ' +
+          '0 0 90px rgba(255, 0, 76, 0.55)';
+
+        micBtn.classList.remove(
+          'listening'
+        );
+
+        isListening = false;
+
+      } else if (
+        state === 'listening'
+      ) {
+
+        statusText.innerText =
+          'Ouvindo...';
+
+        orb.style.boxShadow =
+          '0 0 70px rgba(0, 255, 128, 0.8), ' +
+          '0 0 110px rgba(0, 200, 255, 0.6)';
+
+        micBtn.classList.add(
+          'listening'
+        );
+
+        isListening = true;
+
+      } else if (
+        state === 'thinking'
+      ) {
+
+        statusText.innerText =
+          'Pensando...';
+
+        orb.style.boxShadow =
+          '0 0 80px rgba(255, 180, 0, 0.8), ' +
+          '0 0 120px rgba(255, 0, 100, 0.6)';
+
+        micBtn.classList.remove(
+          'listening'
+        );
+
+        isListening = false;
+
+      } else if (
+        state === 'speaking'
+      ) {
+
+        statusText.innerText =
+          'Jarvis Falando...';
+
+        orb.style.boxShadow =
+          '0 0 90px rgba(0, 150, 255, 0.9), ' +
+          '0 0 130px rgba(180, 0, 255, 0.7)';
+
+        micBtn.classList.remove(
+          'listening'
+        );
+
+        isListening = false;
+
         if (text) {
-          speakAndCaption(text);
+
+          speakAndCaption(
+            text
+          );
         }
       }
     }
 
-    // Síntese de Voz Nativa do App + Legendas de 4 a 7 palavras
-    function speakAndCaption(fullText) {
-      const cleanText = fullText.replace(/[*#_`]/g, '').trim();
-      if (!cleanText) return;
 
-      if ('speechSynthesis' in window) {
+    /* ============================================================
+       SÍNTESE DE VOZ + LEGENDAS
+       ============================================================ */
+
+    function speakAndCaption(
+      fullText
+    ) {
+
+      const cleanText =
+        fullText
+          .replace(/[*#_`]/g, '')
+          .trim();
+
+      if (!cleanText) {
+        return;
+      }
+
+      if (
+        'speechSynthesis' in window
+      ) {
+
         window.speechSynthesis.cancel();
       }
 
-      const words = cleanText.split(/\s+/);
+      const words =
+        cleanText.split(/\s+/);
+
       const chunks = [];
+
       let currentChunk = [];
 
-      words.forEach(word => {
-        currentChunk.push(word);
-        if (currentChunk.length >= 5 || /[.!?]$/.test(word)) {
-          chunks.push(currentChunk.join(" "));
-          currentChunk = [];
+      words.forEach(
+        word => {
+
+          currentChunk.push(
+            word
+          );
+
+          if (
+            currentChunk.length >= 5 ||
+            /[.!?]$/.test(word)
+          ) {
+
+            chunks.push(
+              currentChunk.join(' ')
+            );
+
+            currentChunk = [];
+          }
         }
-      });
-      if (currentChunk.length > 0) chunks.push(currentChunk.join(" "));
+      );
+
+      if (
+        currentChunk.length > 0
+      ) {
+
+        chunks.push(
+          currentChunk.join(' ')
+        );
+      }
 
       let chunkIndex = 0;
-      if (subtitleTimer) clearInterval(subtitleTimer);
 
-      subtitlesBox.classList.add('active');
+      if (subtitleTimer) {
+
+        clearInterval(
+          subtitleTimer
+        );
+      }
+
+      subtitlesBox.classList.add(
+        'active'
+      );
 
       function showNextChunk() {
-        if (chunkIndex < chunks.length) {
-          subtitlesText.innerText = chunks[chunkIndex];
+
+        if (
+          chunkIndex <
+          chunks.length
+        ) {
+
+          subtitlesText.innerText =
+            chunks[chunkIndex];
+
           chunkIndex++;
+
         } else {
-          clearInterval(subtitleTimer);
-          setTimeout(() => {
-            subtitlesBox.classList.remove('active');
-          }, 1500);
+
+          clearInterval(
+            subtitleTimer
+          );
+
+          setTimeout(
+            () => {
+
+              subtitlesBox.classList.remove(
+                'active'
+              );
+
+            },
+            1500
+          );
         }
       }
 
       showNextChunk();
-      if (chunks.length > 1) {
-        subtitleTimer = setInterval(showNextChunk, 1800);
+
+      if (
+        chunks.length > 1
+      ) {
+
+        subtitleTimer =
+          setInterval(
+            showNextChunk,
+            1800
+          );
       }
 
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = 'pt-BR';
-        utterance.rate = 1.05;
-        utterance.pitch = 0.95;
+      if (
+        'speechSynthesis' in window
+      ) {
 
-        utterance.onend = () => { setJarvisState('idle'); };
-        utterance.onerror = () => { setJarvisState('idle'); };
+        const utterance =
+          new SpeechSynthesisUtterance(
+            cleanText
+          );
 
-        window.speechSynthesis.speak(utterance);
+        utterance.lang =
+          'pt-BR';
+
+        utterance.rate =
+          1.05;
+
+        utterance.pitch =
+          0.95;
+
+        utterance.onend = () => {
+
+          setJarvisState(
+            'idle'
+          );
+        };
+
+        utterance.onerror = () => {
+
+          setJarvisState(
+            'idle'
+          );
+        };
+
+        window.speechSynthesis.speak(
+          utterance
+        );
+
       } else {
-        setTimeout(() => setJarvisState('idle'), chunks.length * 1800);
+
+        setTimeout(
+          () => {
+
+            setJarvisState(
+              'idle'
+            );
+
+          },
+          chunks.length * 1800
+        );
       }
     }
 
-    // --- RECONHECIMENTO DE VOZ COMPATÍVEL COM ANDROID NATIVO E NAVEGADOR ---
-    let recognition = null;
 
-    // Callbacks globais chamados pelo código Kotlin/Java do Android
-    window.onSpeechResult = function(text) {
-      if (text) {
-        statusText.innerText = text;
-        sendPrompt(text);
-      } else {
-        setJarvisState('idle');
-      }
-    };
+    /* ============================================================
+       CALLBACKS DO ANDROID NATIVO
+       ============================================================ */
 
-    window.onSpeechError = function(error) {
-      setJarvisState('idle');
-    };
+    window.onSpeechResult =
+      function(text) {
 
-    window.onSpeechStateChange = function(state) {
-      if (state === 'listening') {
-        isListening = true;
-        setJarvisState('listening');
-      } else {
+        console.log(
+          '[Jarvis] Resultado de voz:',
+          text
+        );
+
         isListening = false;
-        if (currentState === 'listening') setJarvisState('idle');
-      }
-    };
 
-    // Configuração para navegadores convencionais (fallback Web Speech API)
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.lang = 'pt-BR';
-      recognition.continuous = false;
+        if (text) {
 
-      recognition.onstart = () => {
-        isListening = true;
-        setJarvisState('listening');
-      };
+          statusText.innerText =
+            text;
 
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        statusText.innerText = transcript;
-        sendPrompt(transcript);
-      };
+          setJarvisState(
+            'thinking',
+            text
+          );
 
-      recognition.onerror = () => {
-        isListening = false;
-        setJarvisState('idle');
-      };
+          sendPrompt(
+            text
+          );
 
-      recognition.onend = () => {
-        isListening = false;
-        if (currentState === 'listening') setJarvisState('idle');
-      };
-    }
-
-    // Clique do Botão de Microfone
-    micBtn.addEventListener('click', () => {
-      // 1. Tenta acionar a Interface Nativa Android (JavascriptInterface)
-      if (window.Android && typeof window.Android.startListening === 'function') {
-        setJarvisState('listening');
-        window.Android.startListening();
-        return;
-      }
-      if (window.AndroidInterface && typeof window.AndroidInterface.startListening === 'function') {
-        setJarvisState('listening');
-        window.AndroidInterface.startListening();
-        return;
-      }
-      if (window.Android && typeof window.Android.startSpeechRecognition === 'function') {
-        setJarvisState('listening');
-        window.Android.startSpeechRecognition();
-        return;
-      }
-      if (window.AndroidInterface && typeof window.AndroidInterface.startSpeechRecognition === 'function') {
-        setJarvisState('listening');
-        window.AndroidInterface.startSpeechRecognition();
-        return;
-      }
-
-      // 2. Tenta acionar a Web Speech API (Caso rode fora do APK/WebView)
-      if (recognition) {
-        if (isListening) {
-          recognition.stop();
         } else {
-          try {
-            recognition.start();
-          } catch(e) {
-            recognition.stop();
+
+          setJarvisState(
+            'idle'
+          );
+        }
+      };
+
+
+    window.onSpeechError =
+      function(error) {
+
+        console.error(
+          '[Jarvis] Erro de voz:',
+          error
+        );
+
+        isListening = false;
+
+        setJarvisState(
+          'idle',
+          error || ''
+        );
+      };
+
+
+    window.onSpeechStateChange =
+      function(state) {
+
+        console.log(
+          '[Jarvis] Estado de voz:',
+          state
+        );
+
+        if (
+          state === 'listening'
+        ) {
+
+          isListening = true;
+
+          setJarvisState(
+            'listening'
+          );
+
+        } else {
+
+          isListening = false;
+
+          if (
+            currentState === 'listening'
+          ) {
+
+            setJarvisState(
+              'idle'
+            );
           }
         }
-        return;
+      };
+
+
+    /* ============================================================
+       WEB SPEECH API — FALLBACK
+       ============================================================ */
+
+    let recognition = null;
+
+    const SpeechRecognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
+
+    if (
+      SpeechRecognition
+    ) {
+
+      recognition =
+        new SpeechRecognition();
+
+      recognition.lang =
+        'pt-BR';
+
+      recognition.continuous =
+        false;
+
+      recognition.interimResults =
+        false;
+
+      recognition.maxAlternatives =
+        1;
+
+      recognition.onstart =
+        () => {
+
+          console.log(
+            '[Jarvis] Web Speech iniciado.'
+          );
+
+          isListening = true;
+
+          setJarvisState(
+            'listening'
+          );
+        };
+
+      recognition.onresult =
+        (event) => {
+
+          const transcript =
+            event
+              .results[0][0]
+              .transcript;
+
+          console.log(
+            '[Jarvis] Web Speech resultado:',
+            transcript
+          );
+
+          isListening = false;
+
+          statusText.innerText =
+            transcript;
+
+          setJarvisState(
+            'thinking',
+            transcript
+          );
+
+          sendPrompt(
+            transcript
+          );
+        };
+
+      recognition.onerror =
+        (event) => {
+
+          console.error(
+            '[Jarvis] Web Speech erro:',
+            event.error
+          );
+
+          isListening = false;
+
+          setJarvisState(
+            'idle'
+          );
+        };
+
+      recognition.onend =
+        () => {
+
+          console.log(
+            '[Jarvis] Web Speech finalizado.'
+          );
+
+          isListening = false;
+
+          if (
+            currentState === 'listening'
+          ) {
+
+            setJarvisState(
+              'idle'
+            );
+          }
+        };
+    }
+
+
+    /* ============================================================
+       BOTÃO DO MICROFONE
+       ============================================================ */
+
+    micBtn.addEventListener(
+      'click',
+      () => {
+
+        console.log(
+          '[Jarvis] Botão de microfone pressionado.'
+        );
+
+
+        /* --------------------------------------------------------
+           1. ANDROIDBRIDGE — PRIORIDADE MÁXIMA
+           -------------------------------------------------------- */
+
+        if (
+          window.AndroidBridge &&
+          typeof window.AndroidBridge.startSpeechRecognition ===
+            'function'
+        ) {
+
+          console.log(
+            '[Jarvis] Chamando AndroidBridge.startSpeechRecognition()'
+          );
+
+          /*
+           * IMPORTANTE:
+           *
+           * NÃO colocamos setJarvisState('listening')
+           * aqui.
+           *
+           * O Kotlin vai iniciar o SpeechRecognizer e,
+           * somente quando o Android chamar
+           * onReadyForSpeech(), a interface receberá
+           * o estado "listening".
+           */
+
+          window.AndroidBridge
+            .startSpeechRecognition();
+
+          return;
+        }
+
+
+        /* --------------------------------------------------------
+           2. ANDROID — COMPATIBILIDADE
+           -------------------------------------------------------- */
+
+        if (
+          window.Android &&
+          typeof window.Android.startSpeechRecognition ===
+            'function'
+        ) {
+
+          console.log(
+            '[Jarvis] Chamando Android.startSpeechRecognition()'
+          );
+
+          window.Android
+            .startSpeechRecognition();
+
+          return;
+        }
+
+
+        /* --------------------------------------------------------
+           3. ANDROIDBRIDGE.startListening()
+           -------------------------------------------------------- */
+
+        if (
+          window.AndroidBridge &&
+          typeof window.AndroidBridge.startListening ===
+            'function'
+        ) {
+
+          console.log(
+            '[Jarvis] Chamando AndroidBridge.startListening()'
+          );
+
+          window.AndroidBridge
+            .startListening();
+
+          return;
+        }
+
+
+        /* --------------------------------------------------------
+           4. ANDROID.startListening()
+           -------------------------------------------------------- */
+
+        if (
+          window.Android &&
+          typeof window.Android.startListening ===
+            'function'
+        ) {
+
+          console.log(
+            '[Jarvis] Chamando Android.startListening()'
+          );
+
+          window.Android
+            .startListening();
+
+          return;
+        }
+
+
+        /* --------------------------------------------------------
+           5. WEB SPEECH API
+           -------------------------------------------------------- */
+
+        if (
+          recognition
+        ) {
+
+          console.log(
+            '[Jarvis] Usando Web Speech API.'
+          );
+
+          if (
+            isListening
+          ) {
+
+            recognition.stop();
+
+          } else {
+
+            try {
+
+              recognition.start();
+
+            } catch (e) {
+
+              console.error(
+                '[Jarvis] Falha ao iniciar Web Speech:',
+                e
+              );
+
+              try {
+                recognition.stop();
+              } catch (_) {}
+            }
+          }
+
+          return;
+        }
+
+
+        /* --------------------------------------------------------
+           6. WEBRTC
+           -------------------------------------------------------- */
+
+        if (
+          navigator.mediaDevices &&
+          navigator.mediaDevices.getUserMedia
+        ) {
+
+          console.log(
+            '[Jarvis] Usando fallback WebRTC.'
+          );
+
+          navigator.mediaDevices
+            .getUserMedia({
+              audio: true
+            })
+
+            .then(
+              () => {
+
+                const promptText =
+                  prompt(
+                    'Microfone autorizado! Digite seu comando:'
+                  );
+
+                if (
+                  promptText
+                ) {
+
+                  sendPrompt(
+                    promptText
+                  );
+                }
+              }
+            )
+
+            .catch(
+              (error) => {
+
+                console.error(
+                  '[Jarvis] Erro no WebRTC:',
+                  error
+                );
+
+                alert(
+                  'Permissão do microfone negada no aplicativo.'
+                );
+              }
+            );
+
+          return;
+        }
+
+
+        /* --------------------------------------------------------
+           7. ÚLTIMO FALLBACK — TEXTO
+           -------------------------------------------------------- */
+
+        const promptText =
+          prompt(
+            'Digite seu comando para o Jarvis:'
+          );
+
+        if (
+          promptText
+        ) {
+
+          sendPrompt(
+            promptText
+          );
+        }
+
       }
+    );
 
-      // 3. Fallback de permissão de mídia via WebRTC
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(() => {
-            const promptText = prompt("Permissão do microfone OK! Digite seu comando:");
-            if (promptText) sendPrompt(promptText);
-          })
-          .catch(() => {
-            alert("Permissão do microfone negada no aplicativo.");
-          });
-        return;
-      }
 
-      // Fallback manual
-      const promptText = prompt("Digite seu comando para o Jarvis:");
-      if (promptText) sendPrompt(promptText);
-    });
+    /* ============================================================
+       CAMPO DE TEXTO
+       ============================================================ */
 
-    document.getElementById('promptPill').addEventListener('click', () => {
-      const promptText = prompt("Digite sua mensagem para o Jarvis:");
-      if (promptText) {
-        statusText.innerText = promptText;
-        sendPrompt(promptText);
-      }
-    });
+    document
+      .getElementById('promptPill')
+      .addEventListener(
+        'click',
+        () => {
 
-    // Renderizador Shader WebGL
-    const canvas = document.getElementById('smokeCanvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+          const promptText =
+            prompt(
+              'Digite sua mensagem para o Jarvis:'
+            );
+
+          if (
+            promptText
+          ) {
+
+            statusText.innerText =
+              promptText;
+
+            sendPrompt(
+              promptText
+            );
+          }
+        }
+      );
+
+
+    /* ============================================================
+       RENDERIZADOR SHADER WEBGL
+       ============================================================ */
+
+    const canvas =
+      document.getElementById(
+        'smokeCanvas'
+      );
+
+    const gl =
+      canvas.getContext('webgl') ||
+      canvas.getContext(
+        'experimental-webgl'
+      );
+
 
     function resizeCanvas() {
-      const rect = canvas.parentElement.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      if (gl) gl.viewport(0, 0, canvas.width, canvas.height);
+
+      const rect =
+        canvas.parentElement
+          .getBoundingClientRect();
+
+      const dpr =
+        Math.min(
+          window.devicePixelRatio || 1,
+          2
+        );
+
+      canvas.width =
+        rect.width * dpr;
+
+      canvas.height =
+        rect.height * dpr;
+
+      if (gl) {
+
+        gl.viewport(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+      }
     }
-    window.addEventListener('resize', resizeCanvas);
+
+
+    window.addEventListener(
+      'resize',
+      resizeCanvas
+    );
+
 
     const vsSource = `
       attribute vec2 a_position;
       varying vec2 v_uv;
+
       void main() {
         v_uv = a_position * 0.5 + 0.5;
         gl_Position = vec4(a_position, 0.0, 1.0);
       }
     `;
 
+
     const fsSource = `
       precision highp float;
+
       uniform float u_time;
       uniform vec2 u_resolution;
       uniform float u_speed;
+
       varying vec2 v_uv;
 
-      float random (in vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233)))*43758.5453123); }
-      float noise (in vec2 st) {
-          vec2 i = floor(st); vec2 f = fract(st);
-          float a = random(i); float b = random(i + vec2(1.0, 0.0));
-          float c = random(i + vec2(0.0, 1.0)); float d = random(i + vec2(1.0, 1.0));
-          vec2 u = f * f * (3.0 - 2.0 * f);
-          return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+      float random(in vec2 st) {
+        return fract(
+          sin(
+            dot(
+              st.xy,
+              vec2(12.9898, 78.233)
+            )
+          ) * 43758.5453123
+        );
       }
+
+      float noise(in vec2 st) {
+
+        vec2 i = floor(st);
+        vec2 f = fract(st);
+
+        float a = random(i);
+        float b = random(i + vec2(1.0, 0.0));
+        float c = random(i + vec2(0.0, 1.0));
+        float d = random(i + vec2(1.0, 1.0));
+
+        vec2 u =
+          f * f * (3.0 - 2.0 * f);
+
+        return mix(a, b, u.x)
+          + (c - a) * u.y * (1.0 - u.x)
+          + (d - b) * u.x * u.y;
+      }
+
 
       #define NUM_OCTAVES 5
-      float fbm ( in vec2 _st) {
-          float v = 0.0; float a = 0.5;
-          vec2 shift = vec2(100.0);
-          mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
-          for (int i = 0; i < NUM_OCTAVES; ++i) {
-              v += a * noise(_st); _st = rot * _st * 2.0 + shift; a *= 0.5;
-          }
-          return v;
+
+      float fbm(in vec2 _st) {
+
+        float v = 0.0;
+        float a = 0.5;
+
+        vec2 shift =
+          vec2(100.0);
+
+        mat2 rot =
+          mat2(
+            cos(0.5),
+            sin(0.5),
+            -sin(0.5),
+            cos(0.50)
+          );
+
+        for (
+          int i = 0;
+          i < NUM_OCTAVES;
+          ++i
+        ) {
+
+          v += a * noise(_st);
+
+          _st =
+            rot * _st * 2.0 +
+            shift;
+
+          a *= 0.5;
+        }
+
+        return v;
       }
 
+
       void main() {
-          vec2 st = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / min(u_resolution.x, u_resolution.y);
-          float dist = length(st);
-          if (dist > 0.495) discard;
 
-          float time = u_time * u_speed;
-          vec2 q = vec2(fbm(st * 2.2 + 0.14 * time), fbm(st * 2.2 + vec2(1.0, 1.0)));
-          vec2 r = vec2(fbm(st * 2.2 + 1.2 * q + vec2(1.7, 9.2) + 0.22 * time), fbm(st * 2.2 + 1.2 * q + vec2(8.3, 2.8) + 0.16 * time));
-          float f = fbm(st * 2.2 + r * 1.4);
+        vec2 st =
+          (
+            gl_FragCoord.xy -
+            0.5 * u_resolution.xy
+          )
+          /
+          min(
+            u_resolution.x,
+            u_resolution.y
+          );
 
-          vec3 electricBlue = vec3(0.0, 0.45, 1.0);
-          vec3 neonRed      = vec3(1.0, 0.02, 0.22);
-          vec3 cyanGlow     = vec3(0.0, 0.9, 1.0);
-          vec3 magentaPink  = vec3(1.0, 0.15, 0.6);
+        float dist =
+          length(st);
 
-          float mixFactor = smoothstep(0.25, 0.75, f);
-          vec3 color = mix(electricBlue, neonRed, mixFactor);
-          color = mix(color, cyanGlow, clamp(q.x * q.x * 2.2, 0.0, 1.0));
-          color = mix(color, magentaPink, clamp(r.y * r.y * 2.2, 0.0, 1.0));
+        if (
+          dist > 0.495
+        ) {
+          discard;
+        }
 
-          color = pow(color, vec3(1.25));
-          float alpha = smoothstep(0.495, 0.485, dist);
-          gl_FragColor = vec4(color, alpha);
+        float time =
+          u_time * u_speed;
+
+        vec2 q =
+          vec2(
+            fbm(
+              st * 2.2 +
+              0.14 * time
+            ),
+
+            fbm(
+              st * 2.2 +
+              vec2(1.0, 1.0)
+            )
+          );
+
+        vec2 r =
+          vec2(
+
+            fbm(
+              st * 2.2 +
+              1.2 * q +
+              vec2(1.7, 9.2) +
+              0.22 * time
+            ),
+
+            fbm(
+              st * 2.2 +
+              1.2 * q +
+              vec2(8.3, 2.8) +
+              0.16 * time
+            )
+          );
+
+        float f =
+          fbm(
+            st * 2.2 +
+            r * 1.4
+          );
+
+
+        vec3 electricBlue =
+          vec3(
+            0.0,
+            0.45,
+            1.0
+          );
+
+        vec3 neonRed =
+          vec3(
+            1.0,
+            0.02,
+            0.22
+          );
+
+        vec3 cyanGlow =
+          vec3(
+            0.0,
+            0.9,
+            1.0
+          );
+
+        vec3 magentaPink =
+          vec3(
+            1.0,
+            0.15,
+            0.6
+          );
+
+
+        float mixFactor =
+          smoothstep(
+            0.25,
+            0.75,
+            f
+          );
+
+        vec3 color =
+          mix(
+            electricBlue,
+            neonRed,
+            mixFactor
+          );
+
+        color =
+          mix(
+            color,
+            cyanGlow,
+            clamp(
+              q.x * q.x * 2.2,
+              0.0,
+              1.0
+            )
+          );
+
+        color =
+          mix(
+            color,
+            magentaPink,
+            clamp(
+              r.y * r.y * 2.2,
+              0.0,
+              1.0
+            )
+          );
+
+        color =
+          pow(
+            color,
+            vec3(1.25)
+          );
+
+        float alpha =
+          smoothstep(
+            0.495,
+            0.485,
+            dist
+          );
+
+        gl_FragColor =
+          vec4(
+            color,
+            alpha
+          );
       }
     `;
 
-    function createShader(gl, type, source) {
-      const shader = gl.createShader(type);
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
+
+    function createShader(
+      gl,
+      type,
+      source
+    ) {
+
+      const shader =
+        gl.createShader(
+          type
+        );
+
+      gl.shaderSource(
+        shader,
+        source
+      );
+
+      gl.compileShader(
+        shader
+      );
+
+      if (
+        !gl.getShaderParameter(
+          shader,
+          gl.COMPILE_STATUS
+        )
+      ) {
+
+        console.error(
+          '[Jarvis] Erro compilando shader:',
+          gl.getShaderInfoLog(
+            shader
+          )
+        );
+      }
+
       return shader;
     }
 
+
     if (gl) {
-      const program = gl.createProgram();
-      gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
-      gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
-      gl.linkProgram(program);
 
-      const posLoc = gl.getAttribLocation(program, 'a_position');
-      const timeLoc = gl.getUniformLocation(program, 'u_time');
-      const resLoc = gl.getUniformLocation(program, 'u_resolution');
-      const speedLoc = gl.getUniformLocation(program, 'u_speed');
+      const program =
+        gl.createProgram();
 
-      const posBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+      gl.attachShader(
+        program,
+        createShader(
+          gl,
+          gl.VERTEX_SHADER,
+          vsSource
+        )
+      );
+
+      gl.attachShader(
+        program,
+        createShader(
+          gl,
+          gl.FRAGMENT_SHADER,
+          fsSource
+        )
+      );
+
+      gl.linkProgram(
+        program
+      );
+
+      if (
+        !gl.getProgramParameter(
+          program,
+          gl.LINK_STATUS
+        )
+      ) {
+
+        console.error(
+          '[Jarvis] Erro linkando WebGL:',
+          gl.getProgramInfoLog(
+            program
+          )
+        );
+      }
+
+
+      const posLoc =
+        gl.getAttribLocation(
+          program,
+          'a_position'
+        );
+
+      const timeLoc =
+        gl.getUniformLocation(
+          program,
+          'u_time'
+        );
+
+      const resLoc =
+        gl.getUniformLocation(
+          program,
+          'u_resolution'
+        );
+
+      const speedLoc =
+        gl.getUniformLocation(
+          program,
+          'u_speed'
+        );
+
+
+      const posBuffer =
+        gl.createBuffer();
+
+      gl.bindBuffer(
+        gl.ARRAY_BUFFER,
+        posBuffer
+      );
+
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([
+          -1, -1,
+           1, -1,
+          -1,  1,
+
+          -1,  1,
+           1, -1,
+           1,  1
+        ]),
+        gl.STATIC_DRAW
+      );
+
 
       resizeCanvas();
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-      let startTime = performance.now();
+      gl.enable(
+        gl.BLEND
+      );
+
+      gl.blendFunc(
+        gl.SRC_ALPHA,
+        gl.ONE_MINUS_SRC_ALPHA
+      );
+
+
+      const startTime =
+        performance.now();
+
 
       function render() {
-        const currentTime = (performance.now() - startTime) * 0.001;
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.useProgram(program);
 
-        gl.enableVertexAttribArray(posLoc);
-        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+        const currentTime =
+          (
+            performance.now() -
+            startTime
+          ) * 0.001;
+
+        gl.clear(
+          gl.COLOR_BUFFER_BIT
+        );
+
+        gl.useProgram(
+          program
+        );
+
+        gl.enableVertexAttribArray(
+          posLoc
+        );
+
+        gl.bindBuffer(
+          gl.ARRAY_BUFFER,
+          posBuffer
+        );
+
+        gl.vertexAttribPointer(
+          posLoc,
+          2,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
 
         let speed = 1.0;
-        if (currentState === 'listening') speed = 2.5;
-        if (currentState === 'thinking') speed = 4.0;
-        if (currentState === 'speaking') speed = 2.0;
 
-        gl.uniform1f(timeLoc, currentTime);
-        gl.uniform1f(speedLoc, speed);
-        gl.uniform2f(resLoc, canvas.width, canvas.height);
+        if (
+          currentState === 'listening'
+        ) {
+          speed = 2.5;
+        }
 
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-        requestAnimationFrame(render);
+        if (
+          currentState === 'thinking'
+        ) {
+          speed = 4.0;
+        }
+
+        if (
+          currentState === 'speaking'
+        ) {
+          speed = 2.0;
+        }
+
+
+        gl.uniform1f(
+          timeLoc,
+          currentTime
+        );
+
+        gl.uniform1f(
+          speedLoc,
+          speed
+        );
+
+        gl.uniform2f(
+          resLoc,
+          canvas.width,
+          canvas.height
+        );
+
+
+        gl.drawArrays(
+          gl.TRIANGLES,
+          0,
+          6
+        );
+
+        requestAnimationFrame(
+          render
+        );
       }
+
       render();
     }
 
+
+    /* ============================================================
+       INICIALIZAÇÃO
+       ============================================================ */
+
     connectWebSocket();
+
   </script>
+
 </body>
 </html>

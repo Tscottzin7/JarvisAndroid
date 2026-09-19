@@ -18,120 +18,293 @@ class SpeechManager(
 ) : RecognitionListener {
 
     private var speechRecognizer: SpeechRecognizer? = null
-    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private val mainHandler =
+        Handler(Looper.getMainLooper())
 
     companion object {
         private const val TAG = "SpeechManager"
     }
 
     fun startListening() {
+
         mainHandler.post {
-            if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-                val msg = "Reconhecimento de voz não suportado neste aparelho."
+
+            if (
+                !SpeechRecognizer.isRecognitionAvailable(
+                    context
+                )
+            ) {
+
+                val msg =
+                    "Reconhecimento de voz não suportado neste aparelho."
+
                 Log.e(TAG, msg)
+
                 onError(msg)
+
                 return@post
             }
 
             destroyRecognizer()
 
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-                setRecognitionListener(this@SpeechManager)
-            }
+            speechRecognizer =
+                SpeechRecognizer.createSpeechRecognizer(
+                    context
+                ).apply {
 
-            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR")
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "pt-BR")
-                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-            }
+                    setRecognitionListener(
+                        this@SpeechManager
+                    )
+                }
+
+            val intent =
+                Intent(
+                    RecognizerIntent.ACTION_RECOGNIZE_SPEECH
+                ).apply {
+
+                    putExtra(
+                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                    )
+
+                    putExtra(
+                        RecognizerIntent.EXTRA_LANGUAGE,
+                        "pt-BR"
+                    )
+
+                    putExtra(
+                        RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
+                        "pt-BR"
+                    )
+
+                    putExtra(
+                        RecognizerIntent.EXTRA_MAX_RESULTS,
+                        1
+                    )
+
+                    putExtra(
+                        RecognizerIntent.EXTRA_PARTIAL_RESULTS,
+                        true
+                    )
+                }
 
             try {
+
                 speechRecognizer?.startListening(intent)
-                onStateChange(true)
-                Log.d(TAG, "SpeechRecognizer iniciado (pt-BR).")
+
+                /*
+                 * IMPORTANTE:
+                 *
+                 * Não marcamos como "listening" aqui.
+                 * O estado só muda quando o Android realmente
+                 * informar que está pronto para receber áudio.
+                 */
+
+                Log.d(
+                    TAG,
+                    "SpeechRecognizer solicitado."
+                )
+
             } catch (e: Exception) {
-                Log.e(TAG, "Erro ao iniciar SpeechRecognizer: ${e.message}", e)
-                onError("Erro ao ativar microfone.")
+
+                Log.e(
+                    TAG,
+                    "Erro ao iniciar SpeechRecognizer: ${e.message}",
+                    e
+                )
+
+                onError(
+                    "Erro ao ativar microfone."
+                )
+
                 onStateChange(false)
             }
         }
     }
 
     fun stopListening() {
+
         mainHandler.post {
+
             try {
+
                 speechRecognizer?.stopListening()
+
             } catch (e: Exception) {
-                Log.e(TAG, "Erro ao parar SpeechRecognizer: ${e.message}", e)
+
+                Log.e(
+                    TAG,
+                    "Erro ao parar SpeechRecognizer: ${e.message}",
+                    e
+                )
             }
         }
     }
 
     fun destroy() {
+
         mainHandler.post {
+
             destroyRecognizer()
         }
     }
 
     private fun destroyRecognizer() {
+
         try {
+
             speechRecognizer?.destroy()
+
             speechRecognizer = null
+
         } catch (e: Exception) {
-            Log.e(TAG, "Erro ao destruir SpeechRecognizer: ${e.message}", e)
+
+            Log.e(
+                TAG,
+                "Erro ao destruir SpeechRecognizer: ${e.message}",
+                e
+            )
         }
     }
 
-    override fun onReadyForSpeech(params: Bundle?) {
-        Log.d(TAG, "Aguardando voz...")
+    override fun onReadyForSpeech(
+        params: Bundle?
+    ) {
+
+        Log.d(
+            TAG,
+            "Microfone pronto. Aguardando voz..."
+        )
+
+        onStateChange(true)
     }
 
     override fun onBeginningOfSpeech() {
-        Log.d(TAG, "Início da fala detectado.")
+
+        Log.d(
+            TAG,
+            "Início da fala detectado."
+        )
     }
 
-    override fun onRmsChanged(rmsdB: Float) {}
+    override fun onRmsChanged(
+        rmsdB: Float
+    ) {
+        // Pode ser usado futuramente para animação de volume.
+    }
 
-    override fun onBufferReceived(buffer: ByteArray?) {}
+    override fun onBufferReceived(
+        buffer: ByteArray?
+    ) {
+        // Não utilizado.
+    }
 
     override fun onEndOfSpeech() {
-        Log.d(TAG, "Fim da fala.")
+
+        Log.d(
+            TAG,
+            "Fim da fala."
+        )
+
         onStateChange(false)
     }
 
-    override fun onError(error: Int) {
-        val errorMessage = when (error) {
-            SpeechRecognizer.ERROR_AUDIO -> "Erro de captura de áudio."
-            SpeechRecognizer.ERROR_CLIENT -> "Erro interno no cliente de voz."
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Permissão de microfone negada."
-            SpeechRecognizer.ERROR_NETWORK -> "Erro de conexão de rede."
-            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Tempo limite de rede excedido."
-            SpeechRecognizer.ERROR_NO_MATCH -> "Nenhum comando reconhecido."
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Serviço de voz ocupado."
-            SpeechRecognizer.ERROR_SERVER -> "Erro do servidor de reconhecimento."
-            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Nenhuma fala detectada."
-            else -> "Erro desconhecido ($error)."
-        }
-        Log.e(TAG, "SpeechRecognizer erro $error:$errorMessage")
+    override fun onError(
+        error: Int
+    ) {
+
+        val errorMessage =
+            when (error) {
+
+                SpeechRecognizer.ERROR_AUDIO ->
+                    "Erro de captura de áudio."
+
+                SpeechRecognizer.ERROR_CLIENT ->
+                    "Erro interno no cliente de voz."
+
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS ->
+                    "Permissão de microfone negada."
+
+                SpeechRecognizer.ERROR_NETWORK ->
+                    "Erro de conexão de rede."
+
+                SpeechRecognizer.ERROR_NETWORK_TIMEOUT ->
+                    "Tempo limite de rede excedido."
+
+                SpeechRecognizer.ERROR_NO_MATCH ->
+                    "Nenhum comando reconhecido."
+
+                SpeechRecognizer.ERROR_RECOGNIZER_BUSY ->
+                    "Serviço de voz ocupado."
+
+                SpeechRecognizer.ERROR_SERVER ->
+                    "Erro do servidor de reconhecimento."
+
+                SpeechRecognizer.ERROR_SPEECH_TIMEOUT ->
+                    "Nenhuma fala detectada."
+
+                else ->
+                    "Erro desconhecido ($error)."
+            }
+
+        Log.e(
+            TAG,
+            "SpeechRecognizer erro $error: $errorMessage"
+        )
+
         onStateChange(false)
+
         onError(errorMessage)
     }
 
-    override fun onResults(results: Bundle?) {
+    override fun onResults(
+        results: Bundle?
+    ) {
+
         onStateChange(false)
-        val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+
+        val matches =
+            results?.getStringArrayList(
+                SpeechRecognizer.RESULTS_RECOGNITION
+            )
+
         if (!matches.isNullOrEmpty()) {
-            val text = matches[0]
-            Log.d(TAG, "Texto reconhecido: $text")
+
+            val text =
+                matches[0]
+
+            Log.d(
+                TAG,
+                "Texto reconhecido: $text"
+            )
+
             onResult(text)
+
         } else {
-            Log.w(TAG, "Resultados vazios retornado pelo SpeechRecognizer.")
-            onError("Fala não compreendida.")
+
+            Log.w(
+                TAG,
+                "Resultados vazios retornados pelo SpeechRecognizer."
+            )
+
+            onError(
+                "Fala não compreendida."
+            )
         }
     }
 
-    override fun onPartialResults(partialResults: Bundle?) {}
+    override fun onPartialResults(
+        partialResults: Bundle?
+    ) {
 
-    override fun onEvent(eventType: Int, params: Bundle?) {}
+        // Resultado parcial disponível para futuras melhorias.
+    }
+
+    override fun onEvent(
+        eventType: Int,
+        params: Bundle?
+    ) {
+        // Não utilizado.
+    }
 }

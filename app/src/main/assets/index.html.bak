@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Jarvis Core Interface</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #000000;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      height: 100dvh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      color: #ffffff;
+    }
+
+    .app-screen {
+      width: 100%;
+      max-width: 430px;
+      height: 100%;
+      background-color: #000000;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      padding: 20px 20px 28px 20px;
+    }
+
+    /* Cabeçalho */
+    .header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      padding-top: 6px;
+    }
+
+    .icon-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #ffffff;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:active {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(0.94);
+    }
+
+    .icon-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    /* Esfera e Legendas */
+    .orb-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      position: relative;
+    }
+
+    .orb-container {
+      width: 270px;
+      height: 270px;
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 
+        0 0 50px rgba(0, 102, 255, 0.65),
+        0 0 90px rgba(255, 0, 76, 0.55),
+        0 0 140px rgba(0, 102, 255, 0.3);
+      transition: box-shadow 0.5s ease;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 50%;
+    }
+
+    .glass-reflection {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      pointer-events: none;
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      background: 
+        radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 45%),
+        radial-gradient(circle at 75% 82%, rgba(255, 0, 76, 0.3) 0%, rgba(0, 0, 0, 0) 50%);
+      box-shadow: 
+        inset 0 3px 12px rgba(255, 255, 255, 0.6),
+        inset 0 -8px 24px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Painel de Legendas Animadas */
+    .subtitles-box {
+      position: absolute;
+      bottom: 25px;
+      width: 90%;
+      min-height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 10px 16px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    .subtitles-box.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .subtitles-text {
+      font-size: 17px;
+      font-weight: 500;
+      line-height: 1.4;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 150, 255, 0.8);
+      animation: fadeInChunk 0.25s ease-out;
+    }
+
+    @keyframes fadeInChunk {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Rodapé */
+    .footer {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .prompt-pill {
+      flex: 1;
+      height: 54px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 27px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      cursor: pointer;
+    }
+
+    .placeholder-text {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 400;
+    }
+
+    /* Botão de Microfone */
+    .mic-btn {
+      width: 54px;
+      height: 54px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mic-btn.listening {
+      background: rgba(0, 255, 128, 0.25);
+      border-color: rgba(0, 255, 128, 0.8);
+      color: #00ff80;
+      box-shadow: 0 0 20px rgba(0, 255, 128, 0.5);
+      animation: pulseMic 1.5s infinite;
+    }
+
+    @keyframes pulseMic {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .close-btn {
+      width: 54px;
+      height: 54px;
+      flex-shrink: 0;
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-screen">
+    <header class="header">
+      <button class="icon-btn" id="btnMenu" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+
+      <button class="icon-btn" id="btnSettings" aria-label="Configurações">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="2.5"/><path d="M2 7h4.5M11.5 7H22"/><circle cx="15" cy="17" r="2.5"/><path d="M2 17h10.5M17.5 17H22"/></svg>
+      </button>
+    </header>
+
+    <main class="orb-wrapper">
+      <div class="orb-container" id="orbContainer">
+        <canvas id="smokeCanvas"></canvas>
+        <div class="glass-reflection"></div>
+      </div>
+
+      <!-- Caixa de Legendas -->
+      <div class="subtitles-box" id="subtitlesBox">
+        <span class="subtitles-text" id="subtitlesText"></span>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="prompt-pill" id="promptPill">
+        <span class="placeholder-text" id="statusText">Jarvis Conectado</span>
+      </div>
+
+      <button class="mic-btn" id="micBtn" aria-label="Microfone">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      </button>
+
+      <button class="icon-btn close-btn" id="closeBtn" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    let ws;
+    const statusText = document.getElementById('statusText');
+    const micBtn = document.getElementById('micBtn');
+    const subtitlesBox = document.getElementById('subtitlesBox');
+    const subtitlesText = document.getElementById('subtitlesText');
+    
+    let isListening = false;
+    let currentState = 'idle'; 
+    let subtitleTimer = null;
+
+    // Conexão WebSocket com o Jarvis Core Python
+    function connectWebSocket() {
+      ws = new WebSocket('ws://' + (window.location.hostname || 'localhost') + ':8765');
+
+      ws.onopen = () => {
+        statusText.innerText = "Jarvis Conectado";
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "state") {
+            setJarvisState(data.state, data.text);
+          }
+        } catch(e) {}
+      };
+
+      ws.onclose = () => {
+        statusText.innerText = "Reconectando Jarvis...";
+        setTimeout(connectWebSocket, 3000);
+      };
+    }
+
+    function sendPrompt(text) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'user_prompt', text: text }));
+      }
+    }
+
+    // Gerenciador de Estados e Voz
+    function setJarvisState(state, text = '') {
+      currentState = state;
+      const orb = document.getElementById('orbContainer');
+
+      if (state === 'idle') {
+        statusText.innerText = "Falar com Jarvis...";
+        orb.style.boxShadow = "0 0 50px rgba(0, 102, 255, 0.65), 0 0 90px rgba(255, 0, 76, 0.55)";
+        micBtn.classList.remove('listening');
+      } else if (state === 'listening') {
+        statusText.innerText = "Ouvindo...";
+        orb.style.boxShadow = "0 0 70px rgba(0, 255, 128, 0.8), 0 0 110px rgba(0, 200, 255, 0.6)";
+        micBtn.classList.add('listening');
+      } else if (state === 'thinking') {
+        statusText.innerText = "Pensando...";
+        orb.style.boxShadow = "0 0 80px rgba(255, 180, 0, 0.8), 0 0 120px rgba(255, 0, 100, 0.6)";
+        micBtn.classList.remove('listening');
+      } else if (state === 'speaking') {
+        statusText.innerText = "Jarvis Falando...";
+        orb.style.boxShadow = "0 0 90px rgba(0, 150, 255, 0.9), 0 0 130px rgba(180, 0, 255, 0.7)";
+        micBtn.classList.remove('listening');
+        if (text) {
+          speakAndCaption(text);
+        }
+      }
+    }
+
+    // Síntese de Voz Nativa do App + Legendas de 4 a 7 palavras
+    function speakAndCaption(fullText) {
+      const cleanText = fullText.replace(/[*#_`]/g, '').trim();
+      if (!cleanText) return;
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      const words = cleanText.split(/\s+/);
+      const chunks = [];
+      let currentChunk = [];
+
+      words.forEach(word => {
+        currentChunk.push(word);
+        if (currentChunk.length >= 5 || /[.!?]$/.test(word)) {
+          chunks.push(currentChunk.join(" "));
+          currentChunk = [];
+        }
+      });
+      if (currentChunk.length > 0) chunks.push(currentChunk.join(" "));
+
+      let chunkIndex = 0;
+      if (subtitleTimer) clearInterval(subtitleTimer);
+
+      subtitlesBox.classList.add('active');
+
+      function showNextChunk() {
+        if (chunkIndex < chunks.length) {
+          subtitlesText.innerText = chunks[chunkIndex];
+          chunkIndex++;
+        } else {
+          clearInterval(subtitleTimer);
+          setTimeout(() => {
+            subtitlesBox.classList.remove('active');
+          }, 1500);
+        }
+      }
+
+      showNextChunk();
+      if (chunks.length > 1) {
+        subtitleTimer = setInterval(showNextChunk, 1800);
+      }
+
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 1.05;
+        utterance.pitch = 0.95;
+
+        utterance.onend = () => { setJarvisState('idle'); };
+        utterance.onerror = () => { setJarvisState('idle'); };
+
+        window.speechSynthesis.speak(utterance);
+      } else {
+        setTimeout(() => setJarvisState('idle'), chunks.length * 1800);
+      }
+    }
+
+    // --- RECONHECIMENTO DE VOZ COMPATÍVEL COM ANDROID NATIVO E NAVEGADOR ---
+    let recognition = null;
+
+    // Callbacks globais chamados pelo código Kotlin/Java do Android
+    window.onSpeechResult = function(text) {
+      if (text) {
+        statusText.innerText = text;
+        sendPrompt(text);
+      } else {
+        setJarvisState('idle');
+      }
+    };
+
+    window.onSpeechError = function(error) {
+      setJarvisState('idle');
+    };
+
+    window.onSpeechStateChange = function(state) {
+      if (state === 'listening') {
+        isListening = true;
+        setJarvisState('listening');
+      } else {
+        isListening = false;
+        if (currentState === 'listening') setJarvisState('idle');
+      }
+    };
+
+    // Configuração para navegadores convencionais (fallback Web Speech API)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = 'pt-BR';
+      recognition.continuous = false;
+
+      recognition.onstart = () => {
+        isListening = true;
+        setJarvisState('listening');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        statusText.innerText = transcript;
+        sendPrompt(transcript);
+      };
+
+      recognition.onerror = () => {
+        isListening = false;
+        setJarvisState('idle');
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        if (currentState === 'listening') setJarvisState('idle');
+      };
+    }
+
+    // Clique do Botão de Microfone
+    micBtn.addEventListener('click', () => {
+      // 1. Tenta acionar a Interface Nativa Android (JavascriptInterface)
+      if (window.Android && typeof window.Android.startListening === 'function') {
+        setJarvisState('listening');
+        window.Android.startListening();
+        return;
+      }
+      if (window.AndroidInterface && typeof window.AndroidInterface.startListening === 'function') {
+        setJarvisState('listening');
+        window.AndroidInterface.startListening();
+        return;
+      }
+      if (window.Android && typeof window.Android.startSpeechRecognition === 'function') {
+        setJarvisState('listening');
+        window.Android.startSpeechRecognition();
+        return;
+      }
+      if (window.AndroidInterface && typeof window.AndroidInterface.startSpeechRecognition === 'function') {
+        setJarvisState('listening');
+        window.AndroidInterface.startSpeechRecognition();
+        return;
+      }
+
+      // 2. Tenta acionar a Web Speech API (Caso rode fora do APK/WebView)
+      if (recognition) {
+        if (isListening) {
+          recognition.stop();
+        } else {
+          try {
+            recognition.start();
+          } catch(e) {
+            recognition.stop();
+          }
+        }
+        return;
+      }
+
+      // 3. Fallback de permissão de mídia via WebRTC
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(() => {
+            const promptText = prompt("Permissão do microfone OK! Digite seu comando:");
+            if (promptText) sendPrompt(promptText);
+          })
+          .catch(() => {
+            alert("Permissão do microfone negada no aplicativo.");
+          });
+        return;
+      }
+
+      // Fallback manual
+      const promptText = prompt("Digite seu comando para o Jarvis:");
+      if (promptText) sendPrompt(promptText);
+    });
+
+    document.getElementById('promptPill').addEventListener('click', () => {
+      const promptText = prompt("Digite sua mensagem para o Jarvis:");
+      if (promptText) {
+        statusText.innerText = promptText;
+        sendPrompt(promptText);
+      }
+    });
+
+    // Renderizador Shader WebGL
+    const canvas = document.getElementById('smokeCanvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      if (gl) gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    const vsSource = `
+      attribute vec2 a_position;
+      varying vec2 v_uv;
+      void main() {
+        v_uv = a_position * 0.5 + 0.5;
+        gl_Position = vec4(a_position, 0.0, 1.0);
+      }
+    `;
+
+    const fsSource = `
+      precision highp float;
+      uniform float u_time;
+      uniform vec2 u_resolution;
+      uniform float u_speed;
+      varying vec2 v_uv;
+
+      float random (in vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233)))*43758.5453123); }
+      float noise (in vec2 st) {
+          vec2 i = floor(st); vec2 f = fract(st);
+          float a = random(i); float b = random(i + vec2(1.0, 0.0));
+          float c = random(i + vec2(0.0, 1.0)); float d = random(i + vec2(1.0, 1.0));
+          vec2 u = f * f * (3.0 - 2.0 * f);
+          return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+      }
+
+      #define NUM_OCTAVES 5
+      float fbm ( in vec2 _st) {
+          float v = 0.0; float a = 0.5;
+          vec2 shift = vec2(100.0);
+          mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
+          for (int i = 0; i < NUM_OCTAVES; ++i) {
+              v += a * noise(_st); _st = rot * _st * 2.0 + shift; a *= 0.5;
+          }
+          return v;
+      }
+
+      void main() {
+          vec2 st = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / min(u_resolution.x, u_resolution.y);
+          float dist = length(st);
+          if (dist > 0.495) discard;
+
+          float time = u_time * u_speed;
+          vec2 q = vec2(fbm(st * 2.2 + 0.14 * time), fbm(st * 2.2 + vec2(1.0, 1.0)));
+          vec2 r = vec2(fbm(st * 2.2 + 1.2 * q + vec2(1.7, 9.2) + 0.22 * time), fbm(st * 2.2 + 1.2 * q + vec2(8.3, 2.8) + 0.16 * time));
+          float f = fbm(st * 2.2 + r * 1.4);
+
+          vec3 electricBlue = vec3(0.0, 0.45, 1.0);
+          vec3 neonRed      = vec3(1.0, 0.02, 0.22);
+          vec3 cyanGlow     = vec3(0.0, 0.9, 1.0);
+          vec3 magentaPink  = vec3(1.0, 0.15, 0.6);
+
+          float mixFactor = smoothstep(0.25, 0.75, f);
+          vec3 color = mix(electricBlue, neonRed, mixFactor);
+          color = mix(color, cyanGlow, clamp(q.x * q.x * 2.2, 0.0, 1.0));
+          color = mix(color, magentaPink, clamp(r.y * r.y * 2.2, 0.0, 1.0));
+
+          color = pow(color, vec3(1.25));
+          float alpha = smoothstep(0.495, 0.485, dist);
+          gl_FragColor = vec4(color, alpha);
+      }
+    `;
+
+    function createShader(gl, type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      return shader;
+    }
+
+    if (gl) {
+      const program = gl.createProgram();
+      gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+      gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+      gl.linkProgram(program);
+
+      const posLoc = gl.getAttribLocation(program, 'a_position');
+      const timeLoc = gl.getUniformLocation(program, 'u_time');
+      const resLoc = gl.getUniformLocation(program, 'u_resolution');
+      const speedLoc = gl.getUniformLocation(program, 'u_speed');
+
+      const posBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
+
+      resizeCanvas();
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+      let startTime = performance.now();
+
+      function render() {
+        const currentTime = (performance.now() - startTime) * 0.001;
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.useProgram(program);
+
+        gl.enableVertexAttribArray(posLoc);
+        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+        let speed = 1.0;
+        if (currentState === 'listening') speed = 2.5;
+        if (currentState === 'thinking') speed = 4.0;
+        if (currentState === 'speaking') speed = 2.0;
+
+        gl.uniform1f(timeLoc, currentTime);
+        gl.uniform1f(speedLoc, speed);
+        gl.uniform2f(resLoc, canvas.width, canvas.height);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    connectWebSocket();
+  </script>
+</body>
+</html>
