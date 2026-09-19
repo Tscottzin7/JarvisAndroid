@@ -43,7 +43,6 @@ class SpeechManager(
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, "pt-BR")
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "pt-BR")
-                putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_PATH_OBSERVED, false)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
             }
 

@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate()
+        super.onCreate(savedInstanceState)
         enableFullScreen()
         setContentView(R.layout.activity_main)
 
@@ -167,9 +167,9 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
 
     override fun onJarvisStateChanged(state: String, text: String) {
         runOnUiThread {
-            val sanitizedText = text.replace("'", "\'").replace("
-", " ")
-            val jsCommand = "if (typeof setJarvisState === 'function') { setJarvisState('$state', '$sanitizedText'); }"
+            val safeState = org.json.JSONObject.quote(state)
+            val safeText = org.json.JSONObject.quote(text)
+            val jsCommand = "if (typeof setJarvisState === 'function') { setJarvisState($safeState, $safeText); }"
             webView.evaluateJavascript(jsCommand, null)
         }
     }
