@@ -60,10 +60,10 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableFullScreen()
-        setContentView(R.layout.activity_main)
+       override fun onCreate(savedInstanceState: Bundle?) {
+       super.onCreate(savedInstanceState)
+       setContentView(R.layout.activity_main)
+       enableFullScreen()
 
         webView = findViewById(R.id.webView)
         configureWebView()
