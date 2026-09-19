@@ -130,7 +130,10 @@ class MainActivity : AppCompatActivity(),
         window.navigationBarColor =
             Color.BLACK
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (
+            Build.VERSION.SDK_INT >=
+            Build.VERSION_CODES.R
+        ) {
 
             window.setDecorFitsSystemWindows(false)
 
@@ -205,19 +208,9 @@ class MainActivity : AppCompatActivity(),
                 }
             }
 
-        /*
-         * Ponte JavaScript -> Android
-         *
-         * O HTML usa:
-         *
-         * window.AndroidBridge
-         *
-         * e também:
-         *
-         * window.Android
-         *
-         * para compatibilidade.
-         */
+        // ========================================================
+        // Ponte JavaScript -> AndroidBridge
+        // ========================================================
 
         webView.addJavascriptInterface(
 
@@ -246,6 +239,15 @@ class MainActivity : AppCompatActivity(),
                     runOnUiThread {
 
                         closeJarvisApp()
+                    }
+                },
+
+                onStopSpeaking = {
+
+                    runOnUiThread {
+
+                        jarvisService
+                            ?.stopSpeaking()
                     }
                 }
             ),
@@ -253,6 +255,10 @@ class MainActivity : AppCompatActivity(),
             "AndroidBridge"
         )
 
+        // ========================================================
+        // Ponte JavaScript -> Android
+        // ========================================================
+
         webView.addJavascriptInterface(
 
             AndroidBridge(
@@ -280,6 +286,15 @@ class MainActivity : AppCompatActivity(),
                     runOnUiThread {
 
                         closeJarvisApp()
+                    }
+                },
+
+                onStopSpeaking = {
+
+                    runOnUiThread {
+
+                        jarvisService
+                            ?.stopSpeaking()
                     }
                 }
             ),
@@ -372,14 +387,10 @@ class MainActivity : AppCompatActivity(),
         )
     }
 
-    /*
-     * Fecha o aplicativo através do botão X
-     * da interface HTML.
-     *
-     * Primeiro remove o listener e desvincula
-     * o Activity do serviço. Depois fecha a
-     * Activity e remove a tarefa do sistema.
-     */
+    // ============================================================
+    // FECHAR APLICATIVO
+    // ============================================================
+
     private fun closeJarvisApp() {
 
         Log.d(
@@ -420,6 +431,10 @@ class MainActivity : AppCompatActivity(),
         finishAndRemoveTask()
     }
 
+    // ============================================================
+    // ESTADO DO JARVIS -> JAVASCRIPT
+    // ============================================================
+
     override fun onJarvisStateChanged(
         state: String,
         text: String
@@ -451,13 +466,25 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    // ============================================================
+    // STATUS WEBSOCKET
+    // ============================================================
+
     override fun onConnectionStatusChanged(
         isConnected: Boolean
     ) {
 
-        // Estado de conexão pode ser usado
-        // futuramente pela interface.
+        Log.d(
+            TAG,
+            "Status WebSocket: ${
+                if (isConnected) "conectado" else "desconectado"
+            }"
+        )
     }
+
+    // ============================================================
+    // DESTROY
+    // ============================================================
 
     override fun onDestroy() {
 
