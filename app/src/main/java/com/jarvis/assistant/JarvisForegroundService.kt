@@ -12,15 +12,20 @@ import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Binder
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
 import android.os.PowerManager
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import org.json.JSONObject
+import java.util.Locale
 
 class JarvisForegroundService :
     Service(),
-    WebSocketManager.WebSocketMessageListener {
+    WebSocketManager.WebSocketMessageListener,
+    TextToSpeech.OnInitListener {
 
     interface ServiceStateListener {
 
@@ -34,26 +39,29 @@ class JarvisForegroundService :
         )
     }
 
-    private val binder =
-        LocalBinder()
+    private val binder = LocalBinder()
 
-    private var stateListener:
-        ServiceStateListener? = null
+    private var stateListener: ServiceStateListener? = null
 
-    private lateinit var webSocketManager:
-        WebSocketManager
+    private lateinit var webSocketManager: WebSocketManager
+    private lateinit var wakeWordManager: WakeWordManager
+    private lateinit var speechManager: SpeechManager
 
-    private lateinit var wakeWordManager:
-        WakeWordManager
+    private var wakeLock: PowerManager.WakeLock? = null
 
-    private lateinit var speechManager:
-        SpeechManager
+    private var currentState = "idle"
 
-    private var wakeLock:
-        PowerManager.WakeLock? = null
+    // ============================================================
+    // TTS NATIVO DO ANDROID
+    // ============================================================
 
-    private var currentState =
-        "idle"
+    private var textToSpeech: TextToSpeech? = null
+
+    private var ttsReady = false
+
+    private var pendingSpeechText: String? = null
+
+    private val ttsUtteranceId = "jarvis_response"
 
     private val porcupineAccessKey =
         "SUA_ACCESS_KEY_AQUI"
@@ -74,8 +82,11 @@ class JarvisForegroundService :
             private set
     }
 
-    inner class LocalBinder :
-        Binder() {
+    // ============================================================
+    // BINDER
+    // ============================================================
+
+    inner class LocalBinder : Binder() {
 
         fun getService():
             JarvisForegroundService =
@@ -88,6 +99,10 @@ class JarvisForegroundService :
 
         return binder
     }
+
+    // ============================================================
+    // CREATE
+    // ============================================================
 
     override fun onCreate() {
 
@@ -106,6 +121,20 @@ class JarvisForegroundService :
 
         startForegroundServiceWithNotification()
 
+        // --------------------------------------------------------
+        // TTS NATIVO
+        // --------------------------------------------------------
+
+        textToSpeech =
+            TextToSpeech(
+                this,
+                this
+            )
+
+        // --------------------------------------------------------
+        // WEBSOCKET
+        // --------------------------------------------------------
+
         webSocketManager =
             WebSocketManager(
                 "ws://127.0.0.1:8765",
@@ -113,6 +142,10 @@ class JarvisForegroundService :
             )
 
         webSocketManager.connect()
+
+        // --------------------------------------------------------
+        // SPEECH RECOGNIZER
+        // --------------------------------------------------------
 
         speechManager =
             SpeechManager(
@@ -136,8 +169,8 @@ class JarvisForegroundService :
                     )
 
                     /*
-                     * Depois que o comando foi processado,
-                     * voltamos a escutar a wake word.
+                     * Depois que o comando foi reconhecido,
+                     * a wake word volta a ficar disponível.
                      */
                     wakeWordManager.start()
                 },
@@ -164,18 +197,13 @@ class JarvisForegroundService :
                         updateState(
                             "listening"
                         )
-
-                    } else {
-
-                        /*
-                         * O SpeechRecognizer pode terminar
-                         * naturalmente. Não forçamos "idle"
-                         * aqui porque o fluxo pode estar indo
-                         * para "thinking".
-                         */
                     }
                 }
             )
+
+        // --------------------------------------------------------
+        // WAKE WORD
+        // --------------------------------------------------------
 
         wakeWordManager =
             WakeWordManager(
@@ -203,6 +231,10 @@ class JarvisForegroundService :
         wakeWordManager.start()
     }
 
+    // ============================================================
+    // START COMMAND
+    // ============================================================
+
     override fun onStartCommand(
         intent: Intent?,
         flags: Int,
@@ -212,6 +244,10 @@ class JarvisForegroundService :
         return START_STICKY
     }
 
+    // ============================================================
+    // ESCUTA MANUAL
+    // ============================================================
+
     fun startManualListening() {
 
         Log.d(
@@ -219,19 +255,22 @@ class JarvisForegroundService :
             "Escuta manual solicitada via UI..."
         )
 
-        /*
-         * A escuta manual desativa temporariamente
-         * a detecção da wake word para evitar dois
-         * sistemas tentando usar o microfone ao mesmo tempo.
-         */
+        stopSpeaking()
+
         wakeWordManager.stop()
 
         speechManager.startListening()
     }
 
+    // ============================================================
+    // ENVIA PROMPT
+    // ============================================================
+
     fun sendPrompt(
         text: String
     ) {
+
+        stopSpeaking()
 
         updateState(
             "thinking",
@@ -242,6 +281,299 @@ class JarvisForegroundService :
             text
         )
     }
+
+    // ============================================================
+    // TTS INIT
+    // ============================================================
+
+    override fun onInit(
+        status: Int
+    ) {
+
+        if (status != TextToSpeech.SUCCESS) {
+
+            Log.e(
+                TAG,
+                "Falha ao inicializar Android TTS."
+            )
+
+            ttsReady = false
+
+            return
+        }
+
+        val result =
+            textToSpeech?.setLanguage(
+                Locale(
+                    "pt",
+                    "BR"
+                )
+            )
+
+        if (
+            result == TextToSpeech.LANG_MISSING_DATA ||
+            result == TextToSpeech.LANG_NOT_SUPPORTED
+        ) {
+
+            Log.e(
+                TAG,
+                "Idioma português do Brasil não disponível."
+            )
+
+            ttsReady = false
+
+            return
+        }
+
+        textToSpeech?.setSpeechRate(
+            1.0f
+        )
+
+        textToSpeech?.setPitch(
+            1.0f
+        )
+
+        textToSpeech?.setOnUtteranceProgressListener(
+
+            object : UtteranceProgressListener() {
+
+                override fun onStart(
+                    utteranceId: String?
+                ) {
+
+                    Log.d(
+                        TAG,
+                        "TTS começou a falar."
+                    )
+                }
+
+                override fun onDone(
+                    utteranceId: String?
+                ) {
+
+                    if (
+                        utteranceId ==
+                        ttsUtteranceId
+                    ) {
+
+                        Log.d(
+                            TAG,
+                            "TTS terminou de falar."
+                        )
+
+                        updateState(
+                            "idle"
+                        )
+                    }
+                }
+
+                override fun onError(
+                    utteranceId: String?
+                ) {
+
+                    if (
+                        utteranceId ==
+                        ttsUtteranceId
+                    ) {
+
+                        Log.e(
+                            TAG,
+                            "Erro durante TTS."
+                        )
+
+                        updateState(
+                            "idle"
+                        )
+                    }
+                }
+
+                override fun onStop(
+                    utteranceId: String?,
+                    interrupted: Boolean
+                ) {
+
+                    if (
+                        utteranceId ==
+                        ttsUtteranceId
+                    ) {
+
+                        Log.d(
+                            TAG,
+                            "TTS interrompido."
+                        )
+
+                        updateState(
+                            "idle"
+                        )
+                    }
+                }
+            }
+        )
+
+        ttsReady = true
+
+        Log.d(
+            TAG,
+            "Android TTS pronto."
+        )
+
+        // Se alguma resposta chegou antes do TTS terminar
+        // de inicializar, fala agora.
+        pendingSpeechText?.let {
+
+            pendingSpeechText = null
+
+            speakText(it)
+        }
+    }
+
+    // ============================================================
+    // LIMPEZA DO TEXTO PARA VOZ
+    // ============================================================
+
+    private fun cleanTextForSpeech(
+        text: String
+    ): String {
+
+        var result = text
+
+        result =
+            result.replace(
+                Regex("```[\\s\\S]*?```"),
+                ""
+            )
+
+        result =
+            result.replace(
+                Regex("\\*\\*(.*?)\\*\\*"),
+                "$1"
+            )
+
+        result =
+            result.replace(
+                Regex("\\*(.*?)\\*"),
+                "$1"
+            )
+
+        result =
+            result.replace(
+                Regex("`(.*?)`"),
+                "$1"
+            )
+
+        result =
+            result.replace(
+                Regex("\\[(.*?)]\\(.*?\\)"),
+                "$1"
+            )
+
+        result =
+            result.replace(
+                Regex("^\\s*#{1,6}\\s*"),
+                ""
+            )
+
+        result =
+            result.replace(
+                Regex("^\\s*[-*+]\\s+"),
+                ""
+            )
+
+        result =
+            result.replace(
+                Regex("\\s+"),
+                " "
+            )
+
+        return result.trim()
+    }
+
+    // ============================================================
+    // FALAR
+    // ============================================================
+
+    private fun speakText(
+        text: String
+    ) {
+
+        val cleanText =
+            cleanTextForSpeech(
+                text
+            )
+
+        if (cleanText.isBlank()) {
+
+            updateState(
+                "idle"
+            )
+
+            return
+        }
+
+        if (!ttsReady) {
+
+            pendingSpeechText =
+                text
+
+            return
+        }
+
+        Log.d(
+            TAG,
+            "Falando: $cleanText"
+        )
+
+        textToSpeech?.stop()
+
+        updateState(
+            "speaking",
+            text
+        )
+
+        val params =
+            Bundle()
+
+        textToSpeech?.speak(
+            cleanText,
+            TextToSpeech.QUEUE_FLUSH,
+            params,
+            ttsUtteranceId
+        )
+    }
+
+    // ============================================================
+    // PARAR FALA
+    // ============================================================
+
+    fun stopSpeaking() {
+
+        Log.d(
+            TAG,
+            "Parando fala..."
+        )
+
+        pendingSpeechText = null
+
+        try {
+
+            textToSpeech?.stop()
+
+        } catch (e: Exception) {
+
+            Log.e(
+                TAG,
+                "Erro ao parar TTS: ${e.message}"
+            )
+        }
+
+        updateState(
+            "idle"
+        )
+    }
+
+    // ============================================================
+    // BEEP
+    // ============================================================
 
     private fun playBeepSound() {
 
@@ -258,6 +590,8 @@ class JarvisForegroundService :
                 150
             )
 
+            toneGen.release()
+
         } catch (e: Exception) {
 
             Log.e(
@@ -266,6 +600,10 @@ class JarvisForegroundService :
             )
         }
     }
+
+    // ============================================================
+    // ESTADO
+    // ============================================================
 
     private fun updateState(
         state: String,
@@ -281,6 +619,10 @@ class JarvisForegroundService :
         )
     }
 
+    // ============================================================
+    // LISTENER DA ACTIVITY
+    // ============================================================
+
     fun setListener(
         listener: ServiceStateListener?
     ) {
@@ -293,6 +635,10 @@ class JarvisForegroundService :
             ""
         )
     }
+
+    // ============================================================
+    // WEBSOCKET CONNECTED
+    // ============================================================
 
     override fun onConnected() {
 
@@ -311,6 +657,10 @@ class JarvisForegroundService :
         )
     }
 
+    // ============================================================
+    // WEBSOCKET DISCONNECTED
+    // ============================================================
+
     override fun onDisconnected() {
 
         Log.w(
@@ -328,6 +678,10 @@ class JarvisForegroundService :
         )
     }
 
+    // ============================================================
+    // MENSAGEM DO PYTHON
+    // ============================================================
+
     override fun onMessageReceived(
         message: String
     ) {
@@ -335,7 +689,9 @@ class JarvisForegroundService :
         try {
 
             val json =
-                JSONObject(message)
+                JSONObject(
+                    message
+                )
 
             if (
                 json.has("type") &&
@@ -354,10 +710,56 @@ class JarvisForegroundService :
                         ""
                     )
 
-                updateState(
-                    state,
-                    text
-                )
+                when (state) {
+
+                    "speaking" -> {
+
+                        if (
+                            text.isNotBlank()
+                        ) {
+
+                            speakText(
+                                text
+                            )
+                        }
+                    }
+
+                    "thinking" -> {
+
+                        updateState(
+                            "thinking",
+                            text
+                        )
+                    }
+
+                    "listening" -> {
+
+                        updateState(
+                            "listening",
+                            text
+                        )
+                    }
+
+                    "idle" -> {
+
+                        /*
+                         * O Python não deve interromper
+                         * o TTS Android mandando idle.
+                         *
+                         * O próprio UtteranceProgressListener
+                         * coloca o estado em idle quando
+                         * a fala realmente terminar.
+                         */
+                    }
+
+                    else -> {
+
+                        updateState(
+                            state,
+                            text
+                        )
+                    }
+                }
             }
 
         } catch (e: Exception) {
@@ -370,6 +772,10 @@ class JarvisForegroundService :
         }
     }
 
+    // ============================================================
+    // WEBSOCKET ERROR
+    // ============================================================
+
     override fun onError(
         error: String
     ) {
@@ -380,6 +786,10 @@ class JarvisForegroundService :
         )
     }
 
+    // ============================================================
+    // NOTIFICATION CHANNEL
+    // ============================================================
+
     private fun createNotificationChannel() {
 
         if (
@@ -389,13 +799,9 @@ class JarvisForegroundService :
 
             val channel =
                 NotificationChannel(
-
                     CHANNEL_ID,
-
                     "Jarvis Service",
-
                     NotificationManager.IMPORTANCE_LOW
-
                 ).apply {
 
                     description =
@@ -413,6 +819,10 @@ class JarvisForegroundService :
         }
     }
 
+    // ============================================================
+    // FOREGROUND NOTIFICATION
+    // ============================================================
+
     private fun startForegroundServiceWithNotification() {
 
         val notificationIntent =
@@ -423,46 +833,36 @@ class JarvisForegroundService :
 
         val pendingIntent =
             PendingIntent.getActivity(
-
                 this,
-
                 0,
-
                 notificationIntent,
-
                 PendingIntent.FLAG_IMMUTABLE or
                     PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-        val notification:
-            Notification =
+        val notification: Notification =
             NotificationCompat.Builder(
                 this,
                 CHANNEL_ID
             )
-
                 .setContentTitle(
                     "Jarvis Ativo"
                 )
-
                 .setContentText(
                     "Toque para abrir a interface do assistente"
                 )
-
                 .setSmallIcon(
                     R.drawable.ic_launcher_foreground
                 )
-
                 .setContentIntent(
                     pendingIntent
                 )
-
-                .setOngoing(true)
-
+                .setOngoing(
+                    true
+                )
                 .setPriority(
                     NotificationCompat.PRIORITY_LOW
                 )
-
                 .build()
 
         if (
@@ -471,11 +871,8 @@ class JarvisForegroundService :
         ) {
 
             startForeground(
-
                 NOTIFICATION_ID,
-
                 notification,
-
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
             )
 
@@ -488,6 +885,10 @@ class JarvisForegroundService :
         }
     }
 
+    // ============================================================
+    // WAKE LOCK
+    // ============================================================
+
     private fun acquireWakeLock() {
 
         try {
@@ -499,11 +900,8 @@ class JarvisForegroundService :
 
             wakeLock =
                 powerManager.newWakeLock(
-
                     PowerManager.PARTIAL_WAKE_LOCK,
-
                     "Jarvis::ServiceWakeLock"
-
                 ).apply {
 
                     acquire(
@@ -547,6 +945,10 @@ class JarvisForegroundService :
         }
     }
 
+    // ============================================================
+    // DESTROY
+    // ============================================================
+
     override fun onDestroy() {
 
         Log.d(
@@ -554,11 +956,24 @@ class JarvisForegroundService :
             "Encerrando JarvisForegroundService..."
         )
 
-        wakeWordManager.stop()
+        try {
+            wakeWordManager.stop()
+        } catch (_: Exception) {}
 
-        speechManager.destroy()
+        try {
+            speechManager.destroy()
+        } catch (_: Exception) {}
 
-        webSocketManager.disconnect()
+        try {
+            webSocketManager.disconnect()
+        } catch (_: Exception) {}
+
+        try {
+            textToSpeech?.stop()
+            textToSpeech?.shutdown()
+        } catch (_: Exception) {}
+
+        textToSpeech = null
 
         releaseWakeLock()
 

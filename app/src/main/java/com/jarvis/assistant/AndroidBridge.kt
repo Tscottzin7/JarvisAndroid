@@ -5,7 +5,8 @@ import android.webkit.JavascriptInterface
 class AndroidBridge(
     private val onTriggerMic: () -> Unit,
     private val onSendPrompt: (String) -> Unit,
-    private val onCloseApp: () -> Unit
+    private val onCloseApp: () -> Unit,
+    private val onStopSpeaking: () -> Unit
 ) {
 
     @JavascriptInterface
@@ -26,5 +27,10 @@ class AndroidBridge(
     @JavascriptInterface
     fun closeApp() {
         onCloseApp()
+    }
+
+    @JavascriptInterface
+    fun stopSpeaking() {
+        onStopSpeaking()
     }
 }
