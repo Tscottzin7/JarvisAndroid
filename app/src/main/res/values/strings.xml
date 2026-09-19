@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Jarvis</string>
+    <string name="accessibility_service_description">Permite que o Jarvis interaja com aplicativos e execute ações solicitadas por você.</string>
 </resources>
