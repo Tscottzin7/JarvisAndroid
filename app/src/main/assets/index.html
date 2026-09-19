@@ -404,7 +404,7 @@
 
 
     /* ============================================================
-       BOTÃO MICROFONE
+       BOTÕES
        ============================================================ */
 
     .mic-btn,
@@ -431,6 +431,11 @@
         box-shadow 0.25s ease,
         opacity 0.2s ease;
     }
+
+
+    /* ============================================================
+       MICROFONE
+       ============================================================ */
 
     .mic-btn {
       background:
@@ -496,7 +501,7 @@
 
 
     /* ============================================================
-       BOTÃO STOP
+       STOP
        ============================================================ */
 
     .stop-btn {
@@ -618,7 +623,7 @@
 
 
     /* ============================================================
-       BOTÃO FECHAR
+       FECHAR
        ============================================================ */
 
     .close-btn {
@@ -651,7 +656,7 @@
 
 
     /* ============================================================
-       DRAWER DE HISTÓRICO
+       HISTÓRICO
        ============================================================ */
 
     .history-overlay {
@@ -1747,19 +1752,154 @@
 
 
     /* ============================================================
+       STOP NATIVO ANDROID
+       ============================================================ */
+
+    function stopNativeAndroidTTS() {
+
+      let called =
+        false;
+
+
+      /*
+       * Primeiro tenta o AndroidBridge.
+       * É o nome principal registrado no MainActivity.
+       */
+
+      try {
+
+        if (
+          window.AndroidBridge &&
+          typeof
+          window.AndroidBridge.stopSpeaking ===
+          'function'
+        ) {
+
+          console.log(
+            '[Jarvis] Chamando AndroidBridge.stopSpeaking()'
+          );
+
+
+          window.AndroidBridge.stopSpeaking();
+
+          called =
+            true;
+
+        }
+
+      } catch (e) {
+
+        console.error(
+          '[Jarvis] Erro no AndroidBridge.stopSpeaking():',
+          e
+        );
+
+      }
+
+
+      /*
+       * Mantém compatibilidade com a interface "Android".
+       */
+
+      if (
+        !called
+      ) {
+
+        try {
+
+          if (
+            window.Android &&
+            typeof
+            window.Android.stopSpeaking ===
+            'function'
+          ) {
+
+            console.log(
+              '[Jarvis] Chamando Android.stopSpeaking()'
+            );
+
+
+            window.Android.stopSpeaking();
+
+            called =
+              true;
+
+          }
+
+        } catch (e) {
+
+          console.error(
+            '[Jarvis] Erro no Android.stopSpeaking():',
+            e
+          );
+
+        }
+
+      }
+
+
+      if (
+        !called
+      ) {
+
+        console.warn(
+          '[Jarvis] Nenhuma interface nativa stopSpeaking() encontrada.'
+        );
+
+      }
+
+
+      return called;
+
+    }
+
+
+    /* ============================================================
        STOP — PARAR FALA
        ============================================================ */
 
     function stopJarvis() {
 
       console.log(
+        '[Jarvis] =================================================='
+      );
+
+      console.log(
         '[Jarvis] STOP pressionado.'
       );
 
 
-      /* ----------------------------------------------------------
-         Para qualquer speechSynthesis residual do WebView
-         ---------------------------------------------------------- */
+      /*
+       * ==========================================================
+       * 1. PARA PRIMEIRO O TTS NATIVO DO ANDROID
+       * ==========================================================
+       *
+       * Essa é a parte mais importante.
+       *
+       * O áudio do APK é controlado pelo TextToSpeech nativo
+       * dentro do JarvisForegroundService.
+       *
+       * Portanto o JavaScript precisa chamar:
+       *
+       * AndroidBridge.stopSpeaking()
+       *
+       * que chega em:
+       *
+       * JarvisForegroundService.stopSpeaking()
+       *
+       * que executa:
+       *
+       * TextToSpeech.stop()
+       */
+
+      stopNativeAndroidTTS();
+
+
+      /*
+       * ==========================================================
+       * 2. PARA QUALQUER TTS DO WEBVIEW
+       * ==========================================================
+       */
 
       try {
 
@@ -1768,6 +1908,10 @@
         ) {
 
           window.speechSynthesis.cancel();
+
+          console.log(
+            '[Jarvis] speechSynthesis.cancel() executado.'
+          );
 
         }
 
@@ -1781,9 +1925,46 @@
       }
 
 
-      /* ----------------------------------------------------------
-         Cancela legendas
-         ---------------------------------------------------------- */
+      /*
+       * ==========================================================
+       * 3. PARA RECONHECIMENTO WEB SE ESTIVER RODANDO
+       * ==========================================================
+       */
+
+      try {
+
+        if (
+          recognition &&
+          isListening
+        ) {
+
+          recognition.stop();
+
+          console.log(
+            '[Jarvis] Web Speech recognition.stop() executado.'
+          );
+
+        }
+
+      } catch (e) {
+
+        console.warn(
+          '[Jarvis] Erro ao parar Web Speech:',
+          e
+        );
+
+      }
+
+
+      isListening =
+        false;
+
+
+      /*
+       * ==========================================================
+       * 4. CANCELA LEGENDAS
+       * ==========================================================
+       */
 
       if (
         subtitleTimer
@@ -1818,9 +1999,15 @@
       );
 
 
-      /* ----------------------------------------------------------
-         Manda STOP para o Python
-         ---------------------------------------------------------- */
+      subtitlesText.innerText =
+        '';
+
+
+      /*
+       * ==========================================================
+       * 5. MANDA STOP PARA O PYTHON
+       * ==========================================================
+       */
 
       if (
         ws &&
@@ -1835,6 +2022,11 @@
             })
           );
 
+
+          console.log(
+            '[Jarvis] STOP enviado ao Python.'
+          );
+
         } catch (e) {
 
           console.warn(
@@ -1844,12 +2036,20 @@
 
         }
 
+      } else {
+
+        console.warn(
+          '[Jarvis] WebSocket não disponível para STOP.'
+        );
+
       }
 
 
-      /* ----------------------------------------------------------
-         Atualiza interface imediatamente
-         ---------------------------------------------------------- */
+      /*
+       * ==========================================================
+       * 6. ATUALIZA INTERFACE
+       * ==========================================================
+       */
 
       stopBtn.classList.remove(
         'visible'
@@ -1858,6 +2058,15 @@
 
       setJarvisState(
         'idle'
+      );
+
+
+      console.log(
+        '[Jarvis] STOP concluído.'
+      );
+
+      console.log(
+        '[Jarvis] =================================================='
       );
 
     }
@@ -2022,18 +2231,10 @@
           false;
 
 
-        /* --------------------------------------------------------
-           Mostra STOP
-           -------------------------------------------------------- */
-
         stopBtn.classList.add(
           'visible'
         );
 
-
-        /* --------------------------------------------------------
-           Mostra legenda
-           -------------------------------------------------------- */
 
         if (text) {
 
@@ -2493,10 +2694,6 @@
         );
 
 
-        /* --------------------------------------------------------
-           AndroidBridge
-           -------------------------------------------------------- */
-
         if (
           window.AndroidBridge &&
           typeof
@@ -2518,10 +2715,6 @@
 
         }
 
-
-        /* --------------------------------------------------------
-           Android
-           -------------------------------------------------------- */
 
         if (
           window.Android &&
@@ -2545,10 +2738,6 @@
         }
 
 
-        /* --------------------------------------------------------
-           AndroidBridge.startListening
-           -------------------------------------------------------- */
-
         if (
           window.AndroidBridge &&
           typeof
@@ -2570,10 +2759,6 @@
 
         }
 
-
-        /* --------------------------------------------------------
-           Android.startListening
-           -------------------------------------------------------- */
 
         if (
           window.Android &&
@@ -2597,10 +2782,6 @@
         }
 
 
-        /* --------------------------------------------------------
-           Web Speech
-           -------------------------------------------------------- */
-
         if (
           recognition
         ) {
@@ -2619,7 +2800,6 @@
               recognition.stop();
 
             } catch (_) {}
-
 
           } else {
 
@@ -2650,10 +2830,6 @@
 
         }
 
-
-        /* --------------------------------------------------------
-           WebRTC
-           -------------------------------------------------------- */
 
         if (
           navigator.mediaDevices &&
@@ -2713,10 +2889,6 @@
 
         }
 
-
-        /* --------------------------------------------------------
-           Texto
-           -------------------------------------------------------- */
 
         const promptText =
           prompt(
@@ -2782,12 +2954,13 @@
           true;
 
 
-        /* Para fala */
+        /*
+         * stopJarvis() agora também chama
+         * TextToSpeech.stop() nativo.
+         */
 
         stopJarvis();
 
-
-        /* Fecha WebSocket */
 
         try {
 
@@ -2801,8 +2974,6 @@
 
         } catch (_) {}
 
-
-        /* Tenta fechar a WebView */
 
         try {
 
@@ -2839,13 +3010,6 @@
 
         } catch (_) {}
 
-
-        /*
-         * Fallback:
-         * no APK Android o fechamento real pode ser
-         * controlado pela Activity.
-         */
-
       }
     );
 
@@ -2862,6 +3026,34 @@
           true;
 
 
+        /*
+         * Primeiro para o TTS nativo.
+         */
+
+        stopNativeAndroidTTS();
+
+
+        /*
+         * Depois cancela qualquer TTS do WebView.
+         */
+
+        try {
+
+          if (
+            'speechSynthesis' in window
+          ) {
+
+            window.speechSynthesis.cancel();
+
+          }
+
+        } catch (_) {}
+
+
+        /*
+         * Finalmente avisa o Python.
+         */
+
         try {
 
           if (
@@ -2874,19 +3066,6 @@
                 type: 'stop_speaking'
               })
             );
-
-          }
-
-        } catch (_) {}
-
-
-        try {
-
-          if (
-            'speechSynthesis' in window
-          ) {
-
-            window.speechSynthesis.cancel();
 
           }
 
