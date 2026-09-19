@@ -355,16 +355,13 @@
 
     // Síntese de Voz Nativa do App + Legendas de 4 a 7 palavras
     function speakAndCaption(fullText) {
-      // Limpa marcações de markdown e colchetes
       const cleanText = fullText.replace(/[*#_`]/g, '').trim();
       if (!cleanText) return;
 
-      // Cancela falas anteriores
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
 
-      // Separa o texto em blocos de 4 a 6 palavras
       const words = cleanText.split(/\s+/);
       const chunks = [];
       let currentChunk = [];
@@ -378,7 +375,6 @@
       });
       if (currentChunk.length > 0) chunks.push(currentChunk.join(" "));
 
-      // Exibe as legendas em tempo real
       let chunkIndex = 0;
       if (subtitleTimer) clearInterval(subtitleTimer);
 
@@ -401,32 +397,50 @@
         subtitleTimer = setInterval(showNextChunk, 1800);
       }
 
-      // Reproduz Áudio Nativo pelo Navegador / Android WebView
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(cleanText);
         utterance.lang = 'pt-BR';
         utterance.rate = 1.05;
         utterance.pitch = 0.95;
 
-        utterance.onend = () => {
-          setJarvisState('idle');
-        };
-
-        utterance.onerror = () => {
-          setJarvisState('idle');
-        };
+        utterance.onend = () => { setJarvisState('idle'); };
+        utterance.onerror = () => { setJarvisState('idle'); };
 
         window.speechSynthesis.speak(utterance);
       } else {
-        // Fallback caso o WebView não tenha synth
         setTimeout(() => setJarvisState('idle'), chunks.length * 1800);
       }
     }
 
-    // Reconhecimento de Voz Seguro (Sem crash)
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
+    // --- RECONHECIMENTO DE VOZ COMPATÍVEL COM ANDROID NATIVO E NAVEGADOR ---
+    let recognition = null;
 
+    // Callbacks globais chamados pelo código Kotlin/Java do Android
+    window.onSpeechResult = function(text) {
+      if (text) {
+        statusText.innerText = text;
+        sendPrompt(text);
+      } else {
+        setJarvisState('idle');
+      }
+    };
+
+    window.onSpeechError = function(error) {
+      setJarvisState('idle');
+    };
+
+    window.onSpeechStateChange = function(state) {
+      if (state === 'listening') {
+        isListening = true;
+        setJarvisState('listening');
+      } else {
+        isListening = false;
+        if (currentState === 'listening') setJarvisState('idle');
+      }
+    };
+
+    // Configuração para navegadores convencionais (fallback Web Speech API)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
       recognition.lang = 'pt-BR';
@@ -450,27 +464,64 @@
 
       recognition.onend = () => {
         isListening = false;
-        if (currentState === 'listening') {
-          setJarvisState('idle');
-        }
+        if (currentState === 'listening') setJarvisState('idle');
       };
     }
 
+    // Clique do Botão de Microfone
     micBtn.addEventListener('click', () => {
-      if (!recognition) {
-        const promptText = prompt("Digite seu comando para o Jarvis:");
-        if (promptText) sendPrompt(promptText);
+      // 1. Tenta acionar a Interface Nativa Android (JavascriptInterface)
+      if (window.Android && typeof window.Android.startListening === 'function') {
+        setJarvisState('listening');
+        window.Android.startListening();
         return;
       }
-      if (isListening) {
-        recognition.stop();
-      } else {
-        try {
-          recognition.start();
-        } catch(e) {
-          recognition.stop();
-        }
+      if (window.AndroidInterface && typeof window.AndroidInterface.startListening === 'function') {
+        setJarvisState('listening');
+        window.AndroidInterface.startListening();
+        return;
       }
+      if (window.Android && typeof window.Android.startSpeechRecognition === 'function') {
+        setJarvisState('listening');
+        window.Android.startSpeechRecognition();
+        return;
+      }
+      if (window.AndroidInterface && typeof window.AndroidInterface.startSpeechRecognition === 'function') {
+        setJarvisState('listening');
+        window.AndroidInterface.startSpeechRecognition();
+        return;
+      }
+
+      // 2. Tenta acionar a Web Speech API (Caso rode fora do APK/WebView)
+      if (recognition) {
+        if (isListening) {
+          recognition.stop();
+        } else {
+          try {
+            recognition.start();
+          } catch(e) {
+            recognition.stop();
+          }
+        }
+        return;
+      }
+
+      // 3. Fallback de permissão de mídia via WebRTC
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(() => {
+            const promptText = prompt("Permissão do microfone OK! Digite seu comando:");
+            if (promptText) sendPrompt(promptText);
+          })
+          .catch(() => {
+            alert("Permissão do microfone negada no aplicativo.");
+          });
+        return;
+      }
+
+      // Fallback manual
+      const promptText = prompt("Digite seu comando para o Jarvis:");
+      if (promptText) sendPrompt(promptText);
     });
 
     document.getElementById('promptPill').addEventListener('click', () => {
