@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Jarvis Interface</title>
+  <title>Jarvis Core Interface</title>
   <style>
     * {
       box-sizing: border-box;
@@ -39,6 +39,7 @@
       padding: 20px 20px 28px 20px;
     }
 
+    /* Cabeçalho */
     .header {
       width: 100%;
       display: flex;
@@ -75,9 +76,11 @@
       fill: currentColor;
     }
 
+    /* Esfera e Legendas */
     .orb-wrapper {
       flex: 1;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       width: 100%;
@@ -85,8 +88,8 @@
     }
 
     .orb-container {
-      width: 280px;
-      height: 280px;
+      width: 270px;
+      height: 270px;
       border-radius: 50%;
       position: relative;
       box-shadow: 
@@ -120,6 +123,55 @@
         inset 0 -8px 24px rgba(0, 0, 0, 0.7);
     }
 
+    /* Painel de Legendas Animadas */
+    .subtitles-box {
+      position: absolute;
+      bottom: 25px;
+      width: 90%;
+      min-height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 10px 16px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    .subtitles-box.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .subtitles-text {
+      font-size: 17px;
+      font-weight: 500;
+      line-height: 1.4;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0, 150, 255, 0.8);
+      animation: fadeInChunk 0.25s ease-out;
+    }
+
+    @keyframes fadeInChunk {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Rodapé */
     .footer {
       width: 100%;
       display: flex;
@@ -137,7 +189,6 @@
       display: flex;
       align-items: center;
       padding: 0 20px;
-      gap: 12px;
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       cursor: pointer;
@@ -152,15 +203,36 @@
       font-weight: 400;
     }
 
+    /* Botão de Microfone */
     .mic-btn {
       width: 54px;
       height: 54px;
       flex-shrink: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .mic-btn.active {
-      background: rgba(0, 255, 128, 0.3);
-      border-color: rgba(0, 255, 128, 0.6);
+    .mic-btn.listening {
+      background: rgba(0, 255, 128, 0.25);
+      border-color: rgba(0, 255, 128, 0.8);
+      color: #00ff80;
+      box-shadow: 0 0 20px rgba(0, 255, 128, 0.5);
+      animation: pulseMic 1.5s infinite;
+    }
+
+    @keyframes pulseMic {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
     }
 
     .close-btn {
@@ -170,6 +242,7 @@
       background: #ffffff;
       color: #000000;
       border: none;
+      border-radius: 50%;
     }
   </style>
 </head>
@@ -191,15 +264,20 @@
         <canvas id="smokeCanvas"></canvas>
         <div class="glass-reflection"></div>
       </div>
+
+      <!-- Caixa de Legendas -->
+      <div class="subtitles-box" id="subtitlesBox">
+        <span class="subtitles-text" id="subtitlesText"></span>
+      </div>
     </main>
 
     <footer class="footer">
       <div class="prompt-pill" id="promptPill">
-        <span class="placeholder-text" id="statusText">Falar com Jarvis...</span>
+        <span class="placeholder-text" id="statusText">Jarvis Conectado</span>
       </div>
 
-      <button class="icon-btn mic-btn" id="micBtn" aria-label="Microfone">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      <button class="mic-btn" id="micBtn" aria-label="Microfone">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
       </button>
 
       <button class="icon-btn close-btn" id="closeBtn" aria-label="Fechar">
@@ -212,11 +290,16 @@
     let ws;
     const statusText = document.getElementById('statusText');
     const micBtn = document.getElementById('micBtn');
+    const subtitlesBox = document.getElementById('subtitlesBox');
+    const subtitlesText = document.getElementById('subtitlesText');
+    
     let isListening = false;
-    let currentState = 'idle';
+    let currentState = 'idle'; 
+    let subtitleTimer = null;
 
+    // Conexão WebSocket com o Jarvis Core Python
     function connectWebSocket() {
-      ws = new WebSocket('ws://127.0.0.1:8765');
+      ws = new WebSocket('ws://' + (window.location.hostname || 'localhost') + ':8765');
 
       ws.onopen = () => {
         statusText.innerText = "Jarvis Conectado";
@@ -228,9 +311,7 @@
           if (data.type === "state") {
             setJarvisState(data.state, data.text);
           }
-        } catch(e) {
-          console.error("Erro ao ler JSON WebSocket:", e);
-        }
+        } catch(e) {}
       };
 
       ws.onclose = () => {
@@ -240,34 +321,109 @@
     }
 
     function sendPrompt(text) {
-      if (window.AndroidBridge) {
-        window.AndroidBridge.sendPrompt(text);
-      } else if (ws && ws.readyState === WebSocket.OPEN) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'user_prompt', text: text }));
       }
     }
 
+    // Gerenciador de Estados e Voz
     function setJarvisState(state, text = '') {
       currentState = state;
       const orb = document.getElementById('orbContainer');
 
       if (state === 'idle') {
-        statusText.innerText = text || "Falar com Jarvis...";
+        statusText.innerText = "Falar com Jarvis...";
         orb.style.boxShadow = "0 0 50px rgba(0, 102, 255, 0.65), 0 0 90px rgba(255, 0, 76, 0.55)";
+        micBtn.classList.remove('listening');
       } else if (state === 'listening') {
-        statusText.innerText = text || "Ouvindo...";
+        statusText.innerText = "Ouvindo...";
         orb.style.boxShadow = "0 0 70px rgba(0, 255, 128, 0.8), 0 0 110px rgba(0, 200, 255, 0.6)";
+        micBtn.classList.add('listening');
       } else if (state === 'thinking') {
-        statusText.innerText = text || "Pensando...";
+        statusText.innerText = "Pensando...";
         orb.style.boxShadow = "0 0 80px rgba(255, 180, 0, 0.8), 0 0 120px rgba(255, 0, 100, 0.6)";
+        micBtn.classList.remove('listening');
       } else if (state === 'speaking') {
-        statusText.innerText = text || "Falando...";
+        statusText.innerText = "Jarvis Falando...";
         orb.style.boxShadow = "0 0 90px rgba(0, 150, 255, 0.9), 0 0 130px rgba(180, 0, 255, 0.7)";
+        micBtn.classList.remove('listening');
+        if (text) {
+          speakAndCaption(text);
+        }
       }
     }
 
-    window.setJarvisState = setJarvisState;
+    // Síntese de Voz Nativa do App + Legendas de 4 a 7 palavras
+    function speakAndCaption(fullText) {
+      // Limpa marcações de markdown e colchetes
+      const cleanText = fullText.replace(/[*#_`]/g, '').trim();
+      if (!cleanText) return;
 
+      // Cancela falas anteriores
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      // Separa o texto em blocos de 4 a 6 palavras
+      const words = cleanText.split(/\s+/);
+      const chunks = [];
+      let currentChunk = [];
+
+      words.forEach(word => {
+        currentChunk.push(word);
+        if (currentChunk.length >= 5 || /[.!?]$/.test(word)) {
+          chunks.push(currentChunk.join(" "));
+          currentChunk = [];
+        }
+      });
+      if (currentChunk.length > 0) chunks.push(currentChunk.join(" "));
+
+      // Exibe as legendas em tempo real
+      let chunkIndex = 0;
+      if (subtitleTimer) clearInterval(subtitleTimer);
+
+      subtitlesBox.classList.add('active');
+
+      function showNextChunk() {
+        if (chunkIndex < chunks.length) {
+          subtitlesText.innerText = chunks[chunkIndex];
+          chunkIndex++;
+        } else {
+          clearInterval(subtitleTimer);
+          setTimeout(() => {
+            subtitlesBox.classList.remove('active');
+          }, 1500);
+        }
+      }
+
+      showNextChunk();
+      if (chunks.length > 1) {
+        subtitleTimer = setInterval(showNextChunk, 1800);
+      }
+
+      // Reproduz Áudio Nativo pelo Navegador / Android WebView
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 1.05;
+        utterance.pitch = 0.95;
+
+        utterance.onend = () => {
+          setJarvisState('idle');
+        };
+
+        utterance.onerror = () => {
+          setJarvisState('idle');
+        };
+
+        window.speechSynthesis.speak(utterance);
+      } else {
+        // Fallback caso o WebView não tenha synth
+        setTimeout(() => setJarvisState('idle'), chunks.length * 1800);
+      }
+    }
+
+    // Reconhecimento de Voz Seguro (Sem crash)
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
 
@@ -278,7 +434,6 @@
 
       recognition.onstart = () => {
         isListening = true;
-        micBtn.classList.add('active');
         setJarvisState('listening');
       };
 
@@ -289,21 +444,19 @@
       };
 
       recognition.onerror = () => {
+        isListening = false;
         setJarvisState('idle');
-        micBtn.classList.remove('active');
       };
 
       recognition.onend = () => {
         isListening = false;
-        micBtn.classList.remove('active');
+        if (currentState === 'listening') {
+          setJarvisState('idle');
+        }
       };
     }
 
     micBtn.addEventListener('click', () => {
-      if (window.AndroidBridge) {
-        window.AndroidBridge.startSpeechRecognition();
-        return;
-      }
       if (!recognition) {
         const promptText = prompt("Digite seu comando para o Jarvis:");
         if (promptText) sendPrompt(promptText);
@@ -312,7 +465,11 @@
       if (isListening) {
         recognition.stop();
       } else {
-        recognition.start();
+        try {
+          recognition.start();
+        } catch(e) {
+          recognition.stop();
+        }
       }
     });
 
@@ -324,6 +481,7 @@
       }
     });
 
+    // Renderizador Shader WebGL
     const canvas = document.getElementById('smokeCanvas');
     const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
@@ -332,7 +490,7 @@
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      if (gl) gl.viewport(0, 0, canvas.width, canvas.height);
     }
     window.addEventListener('resize', resizeCanvas);
 
@@ -405,52 +563,52 @@
       return shader;
     }
 
-    const program = gl.createProgram();
-    gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
-    gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
-    gl.linkProgram(program);
+    if (gl) {
+      const program = gl.createProgram();
+      gl.attachShader(program, createShader(gl, gl.VERTEX_SHADER, vsSource));
+      gl.attachShader(program, createShader(gl, gl.FRAGMENT_SHADER, fsSource));
+      gl.linkProgram(program);
 
-    const posLoc = gl.getAttribLocation(program, 'a_position');
-    const timeLoc = gl.getUniformLocation(program, 'u_time');
-    const resLoc = gl.getUniformLocation(program, 'u_resolution');
-    const speedLoc = gl.getUniformLocation(program, 'u_speed');
+      const posLoc = gl.getAttribLocation(program, 'a_position');
+      const timeLoc = gl.getUniformLocation(program, 'u_time');
+      const resLoc = gl.getUniformLocation(program, 'u_resolution');
+      const speedLoc = gl.getUniformLocation(program, 'u_speed');
 
-    const posBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
-
-    resizeCanvas();
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-    let startTime = performance.now();
-
-    function render() {
-      const currentTime = (performance.now() - startTime) * 0.001;
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.useProgram(program);
-
-      gl.enableVertexAttribArray(posLoc);
+      const posBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-      gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
 
-      let speed = 1.0;
-      if (currentState === 'listening') speed = 2.5;
-      if (currentState === 'thinking') speed = 4.0;
-      if (currentState === 'speaking') speed = 2.0;
+      resizeCanvas();
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-      gl.uniform1f(timeLoc, currentTime);
-      gl.uniform1f(speedLoc, speed);
-      gl.uniform2f(resLoc, canvas.width, canvas.height);
+      let startTime = performance.now();
 
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
-      requestAnimationFrame(render);
+      function render() {
+        const currentTime = (performance.now() - startTime) * 0.001;
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.useProgram(program);
+
+        gl.enableVertexAttribArray(posLoc);
+        gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+        let speed = 1.0;
+        if (currentState === 'listening') speed = 2.5;
+        if (currentState === 'thinking') speed = 4.0;
+        if (currentState === 'speaking') speed = 2.0;
+
+        gl.uniform1f(timeLoc, currentTime);
+        gl.uniform1f(speedLoc, speed);
+        gl.uniform2f(resLoc, canvas.width, canvas.height);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        requestAnimationFrame(render);
+      }
+      render();
     }
 
-    if (!window.AndroidBridge) {
-      connectWebSocket();
-    }
-    render();
+    connectWebSocket();
   </script>
 </body>
 </html>
