@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
+
   <title>Jarvis Core Interface</title>
 
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -14,154 +21,285 @@
       -webkit-tap-highlight-color: transparent;
     }
 
+    html,
     body {
-      background-color: #000000;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-      height: 100vh;
-      height: 100dvh;
-      width: 100vw;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+
+    body {
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "Segoe UI",
+        Roboto,
+        sans-serif;
+
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
-      color: #ffffff;
+
+      color: #fff;
     }
+
+    button {
+      font-family: inherit;
+    }
+
+
+    /* ============================================================
+       APP
+       ============================================================ */
 
     .app-screen {
       width: 100%;
       max-width: 430px;
       height: 100%;
-      background-color: #000000;
+      height: 100dvh;
+
+      background: #000;
+
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
+
       position: relative;
-      padding: 20px 20px 28px 20px;
+
+      padding:
+        20px
+        20px
+        28px
+        20px;
+
+      overflow: hidden;
     }
 
-    /* Cabeçalho */
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+
     .header {
       width: 100%;
+
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
-      z-index: 10;
+
+      z-index: 100;
+
       padding-top: 6px;
     }
 
     .icon-btn {
       width: 46px;
       height: 46px;
+
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+
+      background:
+        rgba(255, 255, 255, 0.08);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.12);
+
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #ffffff;
+
+      color: #fff;
+
       cursor: pointer;
+
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      transition: all 0.2s ease;
+
+      transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease;
+    }
+
+    .icon-btn:hover {
+      background:
+        rgba(255, 255, 255, 0.13);
+
+      border-color:
+        rgba(255, 255, 255, 0.22);
+
+      box-shadow:
+        0 0 18px rgba(255, 255, 255, 0.08);
     }
 
     .icon-btn:active {
-      background: rgba(255, 255, 255, 0.2);
-      transform: scale(0.94);
+      transform: scale(0.88);
+
+      background:
+        rgba(255, 255, 255, 0.2);
     }
 
     .icon-btn svg {
       width: 20px;
       height: 20px;
+
       fill: currentColor;
     }
 
-    /* Esfera */
+
+    /* ============================================================
+       ESFERA
+       ============================================================ */
+
     .orb-wrapper {
       flex: 1;
+
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+
       width: 100%;
+
       position: relative;
     }
 
     .orb-container {
       width: 270px;
       height: 270px;
+
       border-radius: 50%;
+
       position: relative;
+
       box-shadow:
         0 0 50px rgba(0, 102, 255, 0.65),
         0 0 90px rgba(255, 0, 76, 0.55),
         0 0 140px rgba(0, 102, 255, 0.3);
-      transition: box-shadow 0.5s ease;
+
+      transition:
+        box-shadow 0.5s ease;
     }
 
     canvas {
       width: 100%;
       height: 100%;
+
       display: block;
+
       border-radius: 50%;
     }
 
     .glass-reflection {
       position: absolute;
+
       top: 0;
       left: 0;
+
       width: 100%;
       height: 100%;
+
       border-radius: 50%;
+
       pointer-events: none;
-      border: 1.5px solid rgba(255, 255, 255, 0.35);
+
+      border:
+        1.5px solid rgba(255, 255, 255, 0.35);
+
       background:
-        radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 45%),
-        radial-gradient(circle at 75% 82%, rgba(255, 0, 76, 0.3) 0%, rgba(0, 0, 0, 0) 50%);
+        radial-gradient(
+          circle at 32% 26%,
+          rgba(255, 255, 255, 0.5) 0%,
+          rgba(255, 255, 255, 0) 45%
+        ),
+
+        radial-gradient(
+          circle at 75% 82%,
+          rgba(255, 0, 76, 0.3) 0%,
+          rgba(0, 0, 0, 0) 50%
+        );
+
       box-shadow:
         inset 0 3px 12px rgba(255, 255, 255, 0.6),
         inset 0 -8px 24px rgba(0, 0, 0, 0.7);
     }
 
-    /* Legendas */
+
+    /* ============================================================
+       LEGENDAS
+       ============================================================ */
+
     .subtitles-box {
       position: absolute;
+
       bottom: 25px;
+
       width: 90%;
       min-height: 50px;
+
       display: flex;
       justify-content: center;
       align-items: center;
+
       text-align: center;
-      padding: 10px 16px;
+
+      padding:
+        10px
+        16px;
+
       border-radius: 16px;
-      background: rgba(0, 0, 0, 0.5);
+
+      background:
+        rgba(0, 0, 0, 0.5);
+
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.08);
+
       opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.3s ease, transform 0.3s ease;
+
+      transform:
+        translateY(10px);
+
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s ease;
+
       pointer-events: none;
+
       z-index: 15;
     }
 
     .subtitles-box.active {
       opacity: 1;
-      transform: translateY(0);
+
+      transform:
+        translateY(0);
     }
 
     .subtitles-text {
       font-size: 17px;
       font-weight: 500;
+
       line-height: 1.4;
-      color: #ffffff;
-      text-shadow: 0 2px 10px rgba(0, 150, 255, 0.8);
-      animation: fadeInChunk 0.25s ease-out;
+
+      color: #fff;
+
+      text-shadow:
+        0 2px 10px rgba(0, 150, 255, 0.8);
+
+      animation:
+        fadeInChunk 0.25s ease-out;
     }
 
     @keyframes fadeInChunk {
+
       from {
         opacity: 0;
         transform: scale(0.95);
@@ -171,133 +309,729 @@
         opacity: 1;
         transform: scale(1);
       }
+
     }
 
-    /* Rodapé */
+
+    /* ============================================================
+       RODAPÉ
+       ============================================================ */
+
     .footer {
       width: 100%;
+
       display: flex;
       align-items: center;
-      gap: 12px;
-      z-index: 10;
+
+      gap: 10px;
+
+      z-index: 50;
+
+      transition:
+        gap 0.25s ease;
     }
+
+
+    /* ============================================================
+       STATUS
+       ============================================================ */
 
     .prompt-pill {
       flex: 1;
+
+      min-width: 0;
+
       height: 54px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+
+      background:
+        rgba(255, 255, 255, 0.08);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.12);
+
       border-radius: 27px;
+
       display: flex;
       align-items: center;
-      padding: 0 20px;
+
+      padding:
+        0
+        20px;
+
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
+
       cursor: pointer;
+
+      transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .prompt-pill:hover {
+      background:
+        rgba(255, 255, 255, 0.11);
+
+      border-color:
+        rgba(255, 255, 255, 0.18);
+    }
+
+    .prompt-pill:active {
+      transform: scale(0.98);
     }
 
     .placeholder-text {
+      width: 100%;
+
       font-size: 15px;
-      color: rgba(255, 255, 255, 0.85);
+
+      color:
+        rgba(255, 255, 255, 0.85);
+
       white-space: nowrap;
+
       overflow: hidden;
+
       text-overflow: ellipsis;
+
       font-weight: 400;
+
+      transition:
+        color 0.25s ease;
     }
 
-    /* Microfone */
-    .mic-btn {
+
+    /* ============================================================
+       BOTÃO MICROFONE
+       ============================================================ */
+
+    .mic-btn,
+    .stop-btn,
+    .close-btn {
       width: 54px;
       height: 54px;
-      flex-shrink: 0;
+
+      flex:
+        0 0 54px;
+
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #ffffff;
+
       display: flex;
       justify-content: center;
       align-items: center;
+
       cursor: pointer;
+
+      transition:
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        opacity 0.2s ease;
+    }
+
+    .mic-btn {
+      background:
+        rgba(255, 255, 255, 0.08);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.15);
+
+      color: #fff;
+
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mic-btn:hover {
+      background:
+        rgba(255, 255, 255, 0.14);
+
+      border-color:
+        rgba(255, 255, 255, 0.25);
+
+      box-shadow:
+        0 0 18px rgba(255, 255, 255, 0.08);
+    }
+
+    .mic-btn:active {
+      transform: scale(0.86);
     }
 
     .mic-btn.listening {
-      background: rgba(0, 255, 128, 0.25);
-      border-color: rgba(0, 255, 128, 0.8);
-      color: #00ff80;
-      box-shadow: 0 0 20px rgba(0, 255, 128, 0.5);
-      animation: pulseMic 1.5s infinite;
+      background:
+        rgba(0, 255, 128, 0.22);
+
+      border-color:
+        rgba(0, 255, 128, 0.8);
+
+      color:
+        #00ff80;
+
+      box-shadow:
+        0 0 18px rgba(0, 255, 128, 0.35),
+        0 0 35px rgba(0, 255, 128, 0.15);
+
+      animation:
+        pulseMic 1.5s infinite;
     }
 
     @keyframes pulseMic {
+
       0% {
         transform: scale(1);
       }
 
       50% {
-        transform: scale(1.08);
+        transform: scale(1.07);
       }
 
       100% {
         transform: scale(1);
       }
+
     }
 
-    .close-btn {
-      width: 54px;
-      height: 54px;
-      flex-shrink: 0;
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      border-radius: 50%;
+
+    /* ============================================================
+       BOTÃO STOP
+       ============================================================ */
+
+    .stop-btn {
+      background:
+        rgba(255, 40, 70, 0.13);
+
+      border:
+        1px solid rgba(255, 55, 80, 0.45);
+
+      color:
+        #ff3654;
+
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+
+      opacity: 0;
+
+      transform:
+        scale(0.65);
+
+      pointer-events: none;
+
+      position: relative;
+
+      overflow: visible;
     }
+
+    .stop-btn.visible {
+      opacity: 1;
+
+      transform:
+        scale(1);
+
+      pointer-events: auto;
+
+      animation:
+        stopAppear 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+
+    .stop-btn::before {
+      content: "";
+
+      position: absolute;
+
+      inset: -5px;
+
+      border-radius: 50%;
+
+      border:
+        1px solid rgba(255, 45, 70, 0.25);
+
+      opacity: 0;
+
+      animation:
+        stopRing 1.6s ease-out infinite;
+    }
+
+    .stop-btn:hover {
+      background:
+        rgba(255, 35, 60, 0.24);
+
+      border-color:
+        rgba(255, 55, 80, 0.8);
+
+      box-shadow:
+        0 0 20px rgba(255, 30, 60, 0.3);
+    }
+
+    .stop-btn:active {
+      transform:
+        scale(0.84);
+    }
+
+    .stop-btn svg {
+      width: 20px;
+      height: 20px;
+
+      transition:
+        transform 0.2s ease;
+    }
+
+    .stop-btn:active svg {
+      transform:
+        scale(0.82);
+    }
+
+    @keyframes stopAppear {
+
+      0% {
+        opacity: 0;
+        transform: scale(0.55);
+      }
+
+      70% {
+        opacity: 1;
+        transform: scale(1.08);
+      }
+
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+    }
+
+    @keyframes stopRing {
+
+      0% {
+        opacity: 0.65;
+        transform: scale(0.9);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.35);
+      }
+
+    }
+
+
+    /* ============================================================
+       BOTÃO FECHAR
+       ============================================================ */
+
+    .close-btn {
+      background:
+        #fff;
+
+      color:
+        #000;
+
+      border:
+        none;
+
+      box-shadow:
+        0 4px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .close-btn:hover {
+      background:
+        #f0f0f0;
+
+      box-shadow:
+        0 0 20px rgba(255, 255, 255, 0.18);
+    }
+
+    .close-btn:active {
+      transform:
+        scale(0.86)
+        rotate(8deg);
+    }
+
+
+    /* ============================================================
+       DRAWER DE HISTÓRICO
+       ============================================================ */
+
+    .history-overlay {
+      position: fixed;
+
+      inset: 0;
+
+      background:
+        rgba(0, 0, 0, 0.55);
+
+      backdrop-filter:
+        blur(3px);
+
+      -webkit-backdrop-filter:
+        blur(3px);
+
+      opacity: 0;
+
+      pointer-events: none;
+
+      transition:
+        opacity 0.25s ease;
+
+      z-index: 200;
+    }
+
+    .history-overlay.open {
+      opacity: 1;
+
+      pointer-events: auto;
+    }
+
+    .history-drawer {
+      position: absolute;
+
+      top: 0;
+      left: 0;
+
+      width: min(86vw, 360px);
+      height: 100%;
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(14, 14, 17, 0.98),
+          rgba(5, 5, 7, 0.99)
+        );
+
+      border-right:
+        1px solid rgba(255, 255, 255, 0.1);
+
+      box-shadow:
+        12px 0 50px rgba(0, 0, 0, 0.55);
+
+      transform:
+        translateX(-105%);
+
+      transition:
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-overlay.open .history-drawer {
+      transform:
+        translateX(0);
+    }
+
+    .history-header {
+      min-height: 82px;
+
+      padding:
+        22px
+        18px
+        14px
+        20px;
+
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+
+      border-bottom:
+        1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .history-title {
+      font-size: 21px;
+
+      font-weight: 600;
+
+      letter-spacing:
+        -0.4px;
+    }
+
+    .history-subtitle {
+      font-size: 11px;
+
+      color:
+        rgba(255, 255, 255, 0.42);
+
+      margin-top: 3px;
+    }
+
+    .history-close {
+      width: 38px;
+      height: 38px;
+
+      border-radius: 50%;
+
+      border:
+        1px solid rgba(255, 255, 255, 0.1);
+
+      background:
+        rgba(255, 255, 255, 0.06);
+
+      color: #fff;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      transition:
+        transform 0.18s ease,
+        background 0.18s ease;
+    }
+
+    .history-close:active {
+      transform:
+        scale(0.85);
+
+      background:
+        rgba(255, 255, 255, 0.15);
+    }
+
+    .history-list {
+      flex: 1;
+
+      overflow-y: auto;
+
+      padding:
+        16px;
+
+      scrollbar-width: none;
+    }
+
+    .history-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .history-empty {
+      height: 100%;
+
+      display: flex;
+      flex-direction: column;
+
+      align-items: center;
+      justify-content: center;
+
+      text-align: center;
+
+      color:
+        rgba(255, 255, 255, 0.35);
+
+      padding: 30px;
+    }
+
+    .history-empty svg {
+      margin-bottom: 14px;
+
+      opacity: 0.4;
+    }
+
+    .history-empty-title {
+      font-size: 15px;
+
+      color:
+        rgba(255, 255, 255, 0.65);
+
+      margin-bottom: 6px;
+    }
+
+    .history-empty-text {
+      font-size: 12px;
+
+      line-height: 1.5;
+    }
+
+    .history-message {
+      margin-bottom: 15px;
+
+      animation:
+        historyMessageIn 0.25s ease-out;
+    }
+
+    .history-message.user {
+      text-align: right;
+    }
+
+    .history-message.assistant {
+      text-align: left;
+    }
+
+    .history-label {
+      display: block;
+
+      font-size: 10px;
+
+      color:
+        rgba(255, 255, 255, 0.35);
+
+      margin:
+        0
+        7px
+        5px;
+    }
+
+    .history-bubble {
+      display: inline-block;
+
+      max-width: 90%;
+
+      padding:
+        10px
+        13px;
+
+      border-radius: 15px;
+
+      font-size: 13px;
+
+      line-height: 1.45;
+
+      text-align: left;
+
+      word-break: break-word;
+    }
+
+    .history-message.user .history-bubble {
+      background:
+        rgba(0, 125, 255, 0.18);
+
+      border:
+        1px solid rgba(0, 145, 255, 0.2);
+    }
+
+    .history-message.assistant .history-bubble {
+      background:
+        rgba(255, 255, 255, 0.07);
+
+      border:
+        1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    @keyframes historyMessageIn {
+
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+    }
+
+
+    /* ============================================================
+       RESPONSIVO
+       ============================================================ */
+
+    @media (max-height: 650px) {
+
+      .orb-container {
+        width: 220px;
+        height: 220px;
+      }
+
+      .app-screen {
+        padding-bottom: 18px;
+      }
+
+      .subtitles-box {
+        bottom: 15px;
+      }
+
+    }
+
+    @media (max-width: 350px) {
+
+      .app-screen {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .footer {
+        gap: 7px;
+      }
+
+      .prompt-pill {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+
+      .mic-btn,
+      .stop-btn,
+      .close-btn {
+        width: 50px;
+        height: 50px;
+        flex-basis: 50px;
+      }
+
+    }
+
   </style>
 </head>
 
+
 <body>
 
+
+  <!-- ============================================================
+       APP
+       ============================================================ -->
+
   <div class="app-screen">
+
+
+    <!-- ============================================================
+         HEADER
+         ============================================================ -->
 
     <header class="header">
 
       <button
         class="icon-btn"
         id="btnMenu"
-        aria-label="Menu"
+        aria-label="Histórico"
       >
-        <svg viewBox="0 0 24 24">
-          <path
-            d="M4 9h16M4 15h16"
-            stroke="currentColor"
-            stroke-width="2.2"
-            stroke-linecap="round"
-          />
-        </svg>
-      </button>
 
-      <button
-        class="icon-btn"
-        id="btnSettings"
-        aria-label="Configurações"
-      >
         <svg
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="2.2"
+          stroke-linecap="round"
         >
-          <circle cx="9" cy="7" r="2.5" />
-          <path d="M2 7h4.5M11.5 7H22" />
 
-          <circle cx="15" cy="17" r="2.5" />
-          <path d="M2 17h10.5M17.5 17H22" />
+          <line
+            x1="4"
+            y1="7"
+            x2="20"
+            y2="7"
+          />
+
+          <line
+            x1="4"
+            y1="12"
+            x2="20"
+            y2="12"
+          />
+
+          <line
+            x1="4"
+            y1="17"
+            x2="20"
+            y2="17"
+          />
+
         </svg>
+
       </button>
 
     </header>
+
+
+    <!-- ============================================================
+         ESFERA
+         ============================================================ -->
 
     <main class="orb-wrapper">
 
@@ -305,41 +1039,90 @@
         class="orb-container"
         id="orbContainer"
       >
+
         <canvas id="smokeCanvas"></canvas>
+
         <div class="glass-reflection"></div>
+
       </div>
+
+
+      <!-- LEGENDAS -->
 
       <div
         class="subtitles-box"
         id="subtitlesBox"
       >
+
         <span
           class="subtitles-text"
           id="subtitlesText"
         ></span>
+
       </div>
 
     </main>
 
+
+    <!-- ============================================================
+         RODAPÉ
+         ============================================================ -->
+
     <footer class="footer">
+
+
+      <!-- STATUS -->
 
       <div
         class="prompt-pill"
         id="promptPill"
       >
+
         <span
           class="placeholder-text"
           id="statusText"
         >
           Jarvis Conectado
         </span>
+
       </div>
+
+
+      <!-- STOP -->
+
+      <button
+        class="stop-btn"
+        id="stopBtn"
+        aria-label="Parar Jarvis"
+        title="Parar"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+
+          <rect
+            x="7"
+            y="7"
+            width="10"
+            height="10"
+            rx="2"
+          />
+
+        </svg>
+
+      </button>
+
+
+      <!-- MICROFONE -->
 
       <button
         class="mic-btn"
         id="micBtn"
         aria-label="Microfone"
       >
+
         <svg
           width="22"
           height="22"
@@ -350,51 +1133,182 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         >
-          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-          <line x1="12" y1="19" x2="12" y2="22" />
+
+          <path
+            d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"
+          />
+
+          <path
+            d="M19 10v2a7 7 0 0 1-14 0v-2"
+          />
+
+          <line
+            x1="12"
+            y1="19"
+            x2="12"
+            y2="22"
+          />
+
         </svg>
+
       </button>
+
+
+      <!-- FECHAR -->
 
       <button
         class="icon-btn close-btn"
         id="closeBtn"
         aria-label="Fechar"
       >
+
         <svg
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           stroke-width="2.5"
+          stroke-linecap="round"
         >
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
+
+          <line
+            x1="18"
+            y1="6"
+            x2="6"
+            y2="18"
+          />
+
+          <line
+            x1="6"
+            y1="6"
+            x2="18"
+            y2="18"
+          />
+
         </svg>
+
       </button>
 
     </footer>
 
   </div>
 
+
+  <!-- ============================================================
+       HISTÓRICO
+       ============================================================ -->
+
+  <div
+    class="history-overlay"
+    id="historyOverlay"
+  >
+
+    <aside
+      class="history-drawer"
+      id="historyDrawer"
+    >
+
+      <div class="history-header">
+
+        <div>
+
+          <div class="history-title">
+            Histórico
+          </div>
+
+          <div class="history-subtitle">
+            Conversas desta sessão
+          </div>
+
+        </div>
+
+
+        <button
+          class="history-close"
+          id="historyClose"
+          aria-label="Fechar histórico"
+        >
+
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          >
+
+            <line
+              x1="18"
+              y1="6"
+              x2="6"
+              y2="18"
+            />
+
+            <line
+              x1="6"
+              y1="6"
+              x2="18"
+              y2="18"
+            />
+
+          </svg>
+
+        </button>
+
+      </div>
+
+
+      <div
+        class="history-list"
+        id="historyList"
+      >
+
+        <div
+          class="history-empty"
+          id="historyEmpty"
+        >
+
+          <svg
+            width="34"
+            height="34"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+
+            <path
+              d="M21 11.5a8.38 8.38 0 0 1-9 8.5 9.8 9.8 0 0 1-4-.8L3 21l1.8-4A8.5 8.5 0 1 1 21 11.5z"
+            />
+
+          </svg>
+
+          <div class="history-empty-title">
+            Nenhuma conversa ainda
+          </div>
+
+          <div class="history-empty-text">
+            Suas mensagens desta sessão aparecerão aqui.
+          </div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+
   <script>
 
+
     /* ============================================================
-       VARIÁVEIS PRINCIPAIS
+       VARIÁVEIS
        ============================================================ */
 
     let ws = null;
-
-    const statusText =
-      document.getElementById('statusText');
-
-    const micBtn =
-      document.getElementById('micBtn');
-
-    const subtitlesBox =
-      document.getElementById('subtitlesBox');
-
-    const subtitlesText =
-      document.getElementById('subtitlesText');
 
     let isListening = false;
 
@@ -402,12 +1316,243 @@
 
     let subtitleTimer = null;
 
+    let subtitleHideTimer = null;
+
+    let reconnectTimer = null;
+
+    let closingApp = false;
+
+    const sessionHistory = [];
+
+
+    const statusText =
+      document.getElementById(
+        'statusText'
+      );
+
+    const micBtn =
+      document.getElementById(
+        'micBtn'
+      );
+
+    const stopBtn =
+      document.getElementById(
+        'stopBtn'
+      );
+
+    const closeBtn =
+      document.getElementById(
+        'closeBtn'
+      );
+
+    const promptPill =
+      document.getElementById(
+        'promptPill'
+      );
+
+    const subtitlesBox =
+      document.getElementById(
+        'subtitlesBox'
+      );
+
+    const subtitlesText =
+      document.getElementById(
+        'subtitlesText'
+      );
+
+    const historyOverlay =
+      document.getElementById(
+        'historyOverlay'
+      );
+
+    const historyList =
+      document.getElementById(
+        'historyList'
+      );
+
+    const historyEmpty =
+      document.getElementById(
+        'historyEmpty'
+      );
+
 
     /* ============================================================
-       WEBSOCKET — JARVIS CORE PYTHON
+       HISTÓRICO
+       ============================================================ */
+
+    function addHistoryMessage(
+      role,
+      text
+    ) {
+
+      if (!text || !text.trim()) {
+        return;
+      }
+
+      const cleanText =
+        text.trim();
+
+      sessionHistory.push({
+        role,
+        text: cleanText
+      });
+
+      renderHistory();
+
+    }
+
+
+    function renderHistory() {
+
+      const oldMessages =
+        historyList.querySelectorAll(
+          '.history-message'
+        );
+
+      oldMessages.forEach(
+        message => message.remove()
+      );
+
+
+      if (
+        sessionHistory.length === 0
+      ) {
+
+        historyEmpty.style.display =
+          'flex';
+
+        return;
+      }
+
+
+      historyEmpty.style.display =
+        'none';
+
+
+      sessionHistory.forEach(
+        item => {
+
+          const message =
+            document.createElement(
+              'div'
+            );
+
+          message.className =
+            'history-message ' +
+            item.role;
+
+
+          const label =
+            document.createElement(
+              'span'
+            );
+
+          label.className =
+            'history-label';
+
+          label.innerText =
+            item.role === 'user'
+              ? 'Você'
+              : 'Jarvis';
+
+
+          const bubble =
+            document.createElement(
+              'div'
+            );
+
+          bubble.className =
+            'history-bubble';
+
+          bubble.innerText =
+            item.text;
+
+
+          message.appendChild(
+            label
+          );
+
+          message.appendChild(
+            bubble
+          );
+
+
+          historyList.appendChild(
+            message
+          );
+
+        }
+      );
+
+
+      historyList.scrollTop =
+        historyList.scrollHeight;
+
+    }
+
+
+    function openHistory() {
+
+      historyOverlay.classList.add(
+        'open'
+      );
+
+      renderHistory();
+
+    }
+
+
+    function closeHistory() {
+
+      historyOverlay.classList.remove(
+        'open'
+      );
+
+    }
+
+
+    document
+      .getElementById('btnMenu')
+      .addEventListener(
+        'click',
+        openHistory
+      );
+
+
+    document
+      .getElementById('historyClose')
+      .addEventListener(
+        'click',
+        closeHistory
+      );
+
+
+    historyOverlay.addEventListener(
+      'click',
+      event => {
+
+        if (
+          event.target === historyOverlay
+        ) {
+
+          closeHistory();
+
+        }
+
+      }
+    );
+
+
+    /* ============================================================
+       WEBSOCKET
        ============================================================ */
 
     function connectWebSocket() {
+
+      if (closingApp) {
+        return;
+      }
+
 
       try {
 
@@ -415,10 +1560,14 @@
           window.location.hostname ||
           '127.0.0.1';
 
+
         ws =
           new WebSocket(
-            'ws://' + host + ':8765'
+            'ws://' +
+            host +
+            ':8765'
           );
+
 
         ws.onopen = () => {
 
@@ -426,43 +1575,57 @@
             '[Jarvis] WebSocket conectado.'
           );
 
+
           statusText.innerText =
             'Jarvis Conectado';
+
         };
 
-        ws.onmessage = (event) => {
 
-          try {
+        ws.onmessage =
+          event => {
 
-            const data =
-              JSON.parse(event.data);
+            try {
 
-            if (
-              data.type === 'state'
-            ) {
+              const data =
+                JSON.parse(
+                  event.data
+                );
 
-              setJarvisState(
-                data.state,
-                data.text || ''
+
+              if (
+                data.type === 'state'
+              ) {
+
+                setJarvisState(
+                  data.state,
+                  data.text || ''
+                );
+
+              }
+
+            } catch (e) {
+
+              console.error(
+                '[Jarvis] Erro ao processar WebSocket:',
+                e
               );
+
             }
 
-          } catch (e) {
+          };
+
+
+        ws.onerror =
+          error => {
 
             console.error(
-              '[Jarvis] Erro ao processar WebSocket:',
-              e
+              '[Jarvis] Erro WebSocket:',
+              error
             );
-          }
-        };
 
-        ws.onerror = (error) => {
+          };
 
-          console.error(
-            '[Jarvis] Erro WebSocket:',
-            error
-          );
-        };
 
         ws.onclose = () => {
 
@@ -470,14 +1633,33 @@
             '[Jarvis] WebSocket desconectado.'
           );
 
+
+          if (
+            closingApp
+          ) {
+
+            return;
+
+          }
+
+
           statusText.innerText =
             'Reconectando Jarvis...';
 
-          setTimeout(
-            connectWebSocket,
-            3000
+
+          clearTimeout(
+            reconnectTimer
           );
+
+
+          reconnectTimer =
+            setTimeout(
+              connectWebSocket,
+              3000
+            );
+
         };
+
 
       } catch (e) {
 
@@ -486,30 +1668,55 @@
           e
         );
 
-        setTimeout(
-          connectWebSocket,
-          3000
-        );
+
+        if (!closingApp) {
+
+          reconnectTimer =
+            setTimeout(
+              connectWebSocket,
+              3000
+            );
+
+        }
+
       }
+
     }
 
 
-    function sendPrompt(text) {
+    /* ============================================================
+       ENVIAR PROMPT
+       ============================================================ */
+
+    function sendPrompt(
+      text
+    ) {
 
       if (
         !text ||
         !text.trim()
       ) {
+
         return;
+
       }
+
 
       const cleanText =
         text.trim();
+
 
       console.log(
         '[Jarvis] Enviando comando:',
         cleanText
       );
+
+
+      addHistoryMessage(
+        'user',
+        cleanText
+      );
+
 
       if (
         ws &&
@@ -523,20 +1730,147 @@
           })
         );
 
+
       } else {
 
         console.warn(
           '[Jarvis] WebSocket ainda não conectado.'
         );
 
+
         statusText.innerText =
           'Jarvis Offline';
+
       }
+
     }
 
 
     /* ============================================================
-       ESTADOS DA INTERFACE
+       STOP — PARAR FALA
+       ============================================================ */
+
+    function stopJarvis() {
+
+      console.log(
+        '[Jarvis] STOP pressionado.'
+      );
+
+
+      /* ----------------------------------------------------------
+         Para qualquer speechSynthesis residual do WebView
+         ---------------------------------------------------------- */
+
+      try {
+
+        if (
+          'speechSynthesis' in window
+        ) {
+
+          window.speechSynthesis.cancel();
+
+        }
+
+      } catch (e) {
+
+        console.warn(
+          '[Jarvis] Erro ao cancelar TTS Web:',
+          e
+        );
+
+      }
+
+
+      /* ----------------------------------------------------------
+         Cancela legendas
+         ---------------------------------------------------------- */
+
+      if (
+        subtitleTimer
+      ) {
+
+        clearInterval(
+          subtitleTimer
+        );
+
+        subtitleTimer =
+          null;
+
+      }
+
+
+      if (
+        subtitleHideTimer
+      ) {
+
+        clearTimeout(
+          subtitleHideTimer
+        );
+
+        subtitleHideTimer =
+          null;
+
+      }
+
+
+      subtitlesBox.classList.remove(
+        'active'
+      );
+
+
+      /* ----------------------------------------------------------
+         Manda STOP para o Python
+         ---------------------------------------------------------- */
+
+      if (
+        ws &&
+        ws.readyState === WebSocket.OPEN
+      ) {
+
+        try {
+
+          ws.send(
+            JSON.stringify({
+              type: 'stop_speaking'
+            })
+          );
+
+        } catch (e) {
+
+          console.warn(
+            '[Jarvis] Falha ao enviar STOP:',
+            e
+          );
+
+        }
+
+      }
+
+
+      /* ----------------------------------------------------------
+         Atualiza interface imediatamente
+         ---------------------------------------------------------- */
+
+      stopBtn.classList.remove(
+        'visible'
+      );
+
+
+      setJarvisState(
+        'idle'
+      );
+
+    }
+
+
+    stopBtn.addEventListener(
+      'click',
+      stopJarvis
+    );
+
+
+    /* ============================================================
+       ESTADOS
        ============================================================ */
 
     function setJarvisState(
@@ -547,10 +1881,16 @@
       currentState =
         state;
 
+
       const orb =
         document.getElementById(
           'orbContainer'
         );
+
+
+      /* ==========================================================
+         IDLE
+         ========================================================== */
 
       if (
         state === 'idle'
@@ -559,107 +1899,232 @@
         statusText.innerText =
           'Falar com Jarvis...';
 
+
         orb.style.boxShadow =
           '0 0 50px rgba(0, 102, 255, 0.65), ' +
           '0 0 90px rgba(255, 0, 76, 0.55)';
+
 
         micBtn.classList.remove(
           'listening'
         );
 
-        isListening = false;
 
-      } else if (
+        stopBtn.classList.remove(
+          'visible'
+        );
+
+
+        isListening =
+          false;
+
+
+        return;
+
+      }
+
+
+      /* ==========================================================
+         LISTENING
+         ========================================================== */
+
+      if (
         state === 'listening'
       ) {
 
         statusText.innerText =
           'Ouvindo...';
 
+
         orb.style.boxShadow =
           '0 0 70px rgba(0, 255, 128, 0.8), ' +
           '0 0 110px rgba(0, 200, 255, 0.6)';
+
 
         micBtn.classList.add(
           'listening'
         );
 
-        isListening = true;
 
-      } else if (
+        stopBtn.classList.remove(
+          'visible'
+        );
+
+
+        isListening =
+          true;
+
+
+        return;
+
+      }
+
+
+      /* ==========================================================
+         THINKING
+         ========================================================== */
+
+      if (
         state === 'thinking'
       ) {
 
         statusText.innerText =
           'Pensando...';
 
+
         orb.style.boxShadow =
           '0 0 80px rgba(255, 180, 0, 0.8), ' +
           '0 0 120px rgba(255, 0, 100, 0.6)';
+
 
         micBtn.classList.remove(
           'listening'
         );
 
-        isListening = false;
 
-      } else if (
+        stopBtn.classList.remove(
+          'visible'
+        );
+
+
+        isListening =
+          false;
+
+
+        return;
+
+      }
+
+
+      /* ==========================================================
+         SPEAKING
+         ========================================================== */
+
+      if (
         state === 'speaking'
       ) {
 
         statusText.innerText =
           'Jarvis Falando...';
 
+
         orb.style.boxShadow =
           '0 0 90px rgba(0, 150, 255, 0.9), ' +
           '0 0 130px rgba(180, 0, 255, 0.7)';
+
 
         micBtn.classList.remove(
           'listening'
         );
 
-        isListening = false;
+
+        isListening =
+          false;
+
+
+        /* --------------------------------------------------------
+           Mostra STOP
+           -------------------------------------------------------- */
+
+        stopBtn.classList.add(
+          'visible'
+        );
+
+
+        /* --------------------------------------------------------
+           Mostra legenda
+           -------------------------------------------------------- */
 
         if (text) {
 
-          speakAndCaption(
+          addHistoryMessage(
+            'assistant',
             text
           );
+
+
+          showCaption(
+            text
+          );
+
         }
+
       }
+
     }
 
 
     /* ============================================================
-       SÍNTESE DE VOZ + LEGENDAS
+       LEGENDAS
        ============================================================ */
 
-    function speakAndCaption(
+    function showCaption(
       fullText
     ) {
 
-      const cleanText =
-        fullText
-          .replace(/[*#_`]/g, '')
-          .trim();
-
-      if (!cleanText) {
-        return;
-      }
-
       if (
-        'speechSynthesis' in window
+        !fullText
       ) {
 
-        window.speechSynthesis.cancel();
+        return;
+
       }
 
+
+      const cleanText =
+        fullText
+          .replace(
+            /[*#_`]/g,
+            ''
+          )
+          .replace(
+            /\s+/g,
+            ' '
+          )
+          .trim();
+
+
+      if (
+        !cleanText
+      ) {
+
+        return;
+
+      }
+
+
+      if (
+        subtitleTimer
+      ) {
+
+        clearInterval(
+          subtitleTimer
+        );
+
+      }
+
+
+      if (
+        subtitleHideTimer
+      ) {
+
+        clearTimeout(
+          subtitleHideTimer
+        );
+
+      }
+
+
       const words =
-        cleanText.split(/\s+/);
+        cleanText.split(
+          /\s+/
+        );
+
 
       const chunks = [];
 
       let currentChunk = [];
+
 
       words.forEach(
         word => {
@@ -667,6 +2132,7 @@
           currentChunk.push(
             word
           );
+
 
           if (
             currentChunk.length >= 5 ||
@@ -677,10 +2143,14 @@
               currentChunk.join(' ')
             );
 
+
             currentChunk = [];
+
           }
+
         }
       );
+
 
       if (
         currentChunk.length > 0
@@ -689,20 +2159,18 @@
         chunks.push(
           currentChunk.join(' ')
         );
+
       }
 
-      let chunkIndex = 0;
 
-      if (subtitleTimer) {
+      let chunkIndex =
+        0;
 
-        clearInterval(
-          subtitleTimer
-        );
-      }
 
       subtitlesBox.classList.add(
         'active'
       );
+
 
       function showNextChunk() {
 
@@ -712,7 +2180,10 @@
         ) {
 
           subtitlesText.innerText =
-            chunks[chunkIndex];
+            chunks[
+              chunkIndex
+            ];
+
 
           chunkIndex++;
 
@@ -722,20 +2193,29 @@
             subtitleTimer
           );
 
-          setTimeout(
-            () => {
+          subtitleTimer =
+            null;
 
-              subtitlesBox.classList.remove(
-                'active'
-              );
 
-            },
-            1500
-          );
+          subtitleHideTimer =
+            setTimeout(
+              () => {
+
+                subtitlesBox.classList.remove(
+                  'active'
+                );
+
+              },
+              1500
+            );
+
         }
+
       }
 
+
       showNextChunk();
+
 
       if (
         chunks.length > 1
@@ -746,62 +2226,14 @@
             showNextChunk,
             1800
           );
+
       }
 
-      if (
-        'speechSynthesis' in window
-      ) {
-
-        const utterance =
-          new SpeechSynthesisUtterance(
-            cleanText
-          );
-
-        utterance.lang =
-          'pt-BR';
-
-        utterance.rate =
-          1.05;
-
-        utterance.pitch =
-          0.95;
-
-        utterance.onend = () => {
-
-          setJarvisState(
-            'idle'
-          );
-        };
-
-        utterance.onerror = () => {
-
-          setJarvisState(
-            'idle'
-          );
-        };
-
-        window.speechSynthesis.speak(
-          utterance
-        );
-
-      } else {
-
-        setTimeout(
-          () => {
-
-            setJarvisState(
-              'idle'
-            );
-
-          },
-          chunks.length * 1800
-        );
-      }
     }
 
 
     /* ============================================================
-       CALLBACKS DO ANDROID NATIVO
+       CALLBACKS ANDROID
        ============================================================ */
 
     window.onSpeechResult =
@@ -812,28 +2244,38 @@
           text
         );
 
-        isListening = false;
 
-        if (text) {
+        isListening =
+          false;
+
+
+        if (
+          text
+        ) {
 
           statusText.innerText =
             text;
+
 
           setJarvisState(
             'thinking',
             text
           );
 
+
           sendPrompt(
             text
           );
+
 
         } else {
 
           setJarvisState(
             'idle'
           );
+
         }
+
       };
 
 
@@ -845,12 +2287,15 @@
           error
         );
 
-        isListening = false;
+
+        isListening =
+          false;
+
 
         setJarvisState(
-          'idle',
-          error || ''
+          'idle'
         );
+
       };
 
 
@@ -862,19 +2307,25 @@
           state
         );
 
+
         if (
           state === 'listening'
         ) {
 
-          isListening = true;
+          isListening =
+            true;
+
 
           setJarvisState(
             'listening'
           );
 
+
         } else {
 
-          isListening = false;
+          isListening =
+            false;
+
 
           if (
             currentState === 'listening'
@@ -883,8 +2334,11 @@
             setJarvisState(
               'idle'
             );
+
           }
+
         }
+
       };
 
 
@@ -894,9 +2348,11 @@
 
     let recognition = null;
 
+
     const SpeechRecognition =
       window.SpeechRecognition ||
       window.webkitSpeechRecognition;
+
 
     if (
       SpeechRecognition
@@ -905,17 +2361,22 @@
       recognition =
         new SpeechRecognition();
 
+
       recognition.lang =
         'pt-BR';
+
 
       recognition.continuous =
         false;
 
+
       recognition.interimResults =
         false;
 
+
       recognition.maxAlternatives =
         1;
+
 
       recognition.onstart =
         () => {
@@ -924,55 +2385,73 @@
             '[Jarvis] Web Speech iniciado.'
           );
 
-          isListening = true;
+
+          isListening =
+            true;
+
 
           setJarvisState(
             'listening'
           );
+
         };
 
+
       recognition.onresult =
-        (event) => {
+        event => {
 
           const transcript =
             event
               .results[0][0]
               .transcript;
 
+
           console.log(
             '[Jarvis] Web Speech resultado:',
             transcript
           );
 
-          isListening = false;
+
+          isListening =
+            false;
+
 
           statusText.innerText =
             transcript;
+
 
           setJarvisState(
             'thinking',
             transcript
           );
 
+
           sendPrompt(
             transcript
           );
+
         };
 
+
       recognition.onerror =
-        (event) => {
+        event => {
 
           console.error(
             '[Jarvis] Web Speech erro:',
             event.error
           );
 
-          isListening = false;
+
+          isListening =
+            false;
+
 
           setJarvisState(
             'idle'
           );
+
         };
+
 
       recognition.onend =
         () => {
@@ -981,7 +2460,10 @@
             '[Jarvis] Web Speech finalizado.'
           );
 
-          isListening = false;
+
+          isListening =
+            false;
+
 
           if (
             currentState === 'listening'
@@ -990,13 +2472,16 @@
             setJarvisState(
               'idle'
             );
+
           }
+
         };
+
     }
 
 
     /* ============================================================
-       BOTÃO DO MICROFONE
+       MICROFONE
        ============================================================ */
 
     micBtn.addEventListener(
@@ -1009,103 +2494,111 @@
 
 
         /* --------------------------------------------------------
-           1. ANDROIDBRIDGE — PRIORIDADE MÁXIMA
+           AndroidBridge
            -------------------------------------------------------- */
 
         if (
           window.AndroidBridge &&
-          typeof window.AndroidBridge.startSpeechRecognition ===
-            'function'
+          typeof
+          window.AndroidBridge
+            .startSpeechRecognition ===
+          'function'
         ) {
 
           console.log(
             '[Jarvis] Chamando AndroidBridge.startSpeechRecognition()'
           );
 
-          /*
-           * IMPORTANTE:
-           *
-           * NÃO colocamos setJarvisState('listening')
-           * aqui.
-           *
-           * O Kotlin vai iniciar o SpeechRecognizer e,
-           * somente quando o Android chamar
-           * onReadyForSpeech(), a interface receberá
-           * o estado "listening".
-           */
 
           window.AndroidBridge
             .startSpeechRecognition();
 
+
           return;
+
         }
 
 
         /* --------------------------------------------------------
-           2. ANDROID — COMPATIBILIDADE
+           Android
            -------------------------------------------------------- */
 
         if (
           window.Android &&
-          typeof window.Android.startSpeechRecognition ===
-            'function'
+          typeof
+          window.Android
+            .startSpeechRecognition ===
+          'function'
         ) {
 
           console.log(
             '[Jarvis] Chamando Android.startSpeechRecognition()'
           );
 
+
           window.Android
             .startSpeechRecognition();
 
+
           return;
+
         }
 
 
         /* --------------------------------------------------------
-           3. ANDROIDBRIDGE.startListening()
+           AndroidBridge.startListening
            -------------------------------------------------------- */
 
         if (
           window.AndroidBridge &&
-          typeof window.AndroidBridge.startListening ===
-            'function'
+          typeof
+          window.AndroidBridge
+            .startListening ===
+          'function'
         ) {
 
           console.log(
             '[Jarvis] Chamando AndroidBridge.startListening()'
           );
 
+
           window.AndroidBridge
             .startListening();
 
+
           return;
+
         }
 
 
         /* --------------------------------------------------------
-           4. ANDROID.startListening()
+           Android.startListening
            -------------------------------------------------------- */
 
         if (
           window.Android &&
-          typeof window.Android.startListening ===
-            'function'
+          typeof
+          window.Android
+            .startListening ===
+          'function'
         ) {
 
           console.log(
             '[Jarvis] Chamando Android.startListening()'
           );
 
+
           window.Android
             .startListening();
 
+
           return;
+
         }
 
 
         /* --------------------------------------------------------
-           5. WEB SPEECH API
+           Web Speech
            -------------------------------------------------------- */
 
         if (
@@ -1116,11 +2609,17 @@
             '[Jarvis] Usando Web Speech API.'
           );
 
+
           if (
             isListening
           ) {
 
-            recognition.stop();
+            try {
+
+              recognition.stop();
+
+            } catch (_) {}
+
 
           } else {
 
@@ -1135,18 +2634,25 @@
                 e
               );
 
+
               try {
+
                 recognition.stop();
+
               } catch (_) {}
+
             }
+
           }
 
+
           return;
+
         }
 
 
         /* --------------------------------------------------------
-           6. WEBRTC
+           WebRTC
            -------------------------------------------------------- */
 
         if (
@@ -1157,6 +2663,7 @@
           console.log(
             '[Jarvis] Usando fallback WebRTC.'
           );
+
 
           navigator.mediaDevices
             .getUserMedia({
@@ -1171,6 +2678,7 @@
                     'Microfone autorizado! Digite seu comando:'
                   );
 
+
                 if (
                   promptText
                 ) {
@@ -1178,36 +2686,43 @@
                   sendPrompt(
                     promptText
                   );
+
                 }
+
               }
             )
 
             .catch(
-              (error) => {
+              error => {
 
                 console.error(
                   '[Jarvis] Erro no WebRTC:',
                   error
                 );
 
+
                 alert(
                   'Permissão do microfone negada no aplicativo.'
                 );
+
               }
             );
 
+
           return;
+
         }
 
 
         /* --------------------------------------------------------
-           7. ÚLTIMO FALLBACK — TEXTO
+           Texto
            -------------------------------------------------------- */
 
         const promptText =
           prompt(
             'Digite seu comando para o Jarvis:'
           );
+
 
         if (
           promptText
@@ -1216,6 +2731,7 @@
           sendPrompt(
             promptText
           );
+
         }
 
       }
@@ -1226,34 +2742,162 @@
        CAMPO DE TEXTO
        ============================================================ */
 
-    document
-      .getElementById('promptPill')
-      .addEventListener(
-        'click',
-        () => {
+    promptPill.addEventListener(
+      'click',
+      () => {
 
-          const promptText =
-            prompt(
-              'Digite sua mensagem para o Jarvis:'
-            );
+        const promptText =
+          prompt(
+            'Digite sua mensagem para o Jarvis:'
+          );
 
-          if (
+
+        if (
+          promptText
+        ) {
+
+          statusText.innerText =
+            promptText;
+
+
+          sendPrompt(
             promptText
-          ) {
+          );
 
-            statusText.innerText =
-              promptText;
-
-            sendPrompt(
-              promptText
-            );
-          }
         }
-      );
+
+      }
+    );
 
 
     /* ============================================================
-       RENDERIZADOR SHADER WEBGL
+       BOTÃO FECHAR
+       ============================================================ */
+
+    closeBtn.addEventListener(
+      'click',
+      () => {
+
+        closingApp =
+          true;
+
+
+        /* Para fala */
+
+        stopJarvis();
+
+
+        /* Fecha WebSocket */
+
+        try {
+
+          if (
+            ws
+          ) {
+
+            ws.close();
+
+          }
+
+        } catch (_) {}
+
+
+        /* Tenta fechar a WebView */
+
+        try {
+
+          if (
+            window.Android &&
+            typeof
+            window.Android.closeApp ===
+            'function'
+          ) {
+
+            window.Android.closeApp();
+
+            return;
+
+          }
+
+        } catch (_) {}
+
+
+        try {
+
+          if (
+            window.AndroidBridge &&
+            typeof
+            window.AndroidBridge.closeApp ===
+            'function'
+          ) {
+
+            window.AndroidBridge.closeApp();
+
+            return;
+
+          }
+
+        } catch (_) {}
+
+
+        /*
+         * Fallback:
+         * no APK Android o fechamento real pode ser
+         * controlado pela Activity.
+         */
+
+      }
+    );
+
+
+    /* ============================================================
+       PARAR AO SAIR DA PÁGINA
+       ============================================================ */
+
+    window.addEventListener(
+      'pagehide',
+      () => {
+
+        closingApp =
+          true;
+
+
+        try {
+
+          if (
+            ws &&
+            ws.readyState === WebSocket.OPEN
+          ) {
+
+            ws.send(
+              JSON.stringify({
+                type: 'stop_speaking'
+              })
+            );
+
+          }
+
+        } catch (_) {}
+
+
+        try {
+
+          if (
+            'speechSynthesis' in window
+          ) {
+
+            window.speechSynthesis.cancel();
+
+          }
+
+        } catch (_) {}
+
+      }
+    );
+
+
+    /* ============================================================
+       WEBGL
        ============================================================ */
 
     const canvas =
@@ -1261,8 +2905,11 @@
         'smokeCanvas'
       );
 
+
     const gl =
-      canvas.getContext('webgl') ||
+      canvas.getContext(
+        'webgl'
+      ) ||
       canvas.getContext(
         'experimental-webgl'
       );
@@ -1274,19 +2921,25 @@
         canvas.parentElement
           .getBoundingClientRect();
 
+
       const dpr =
         Math.min(
           window.devicePixelRatio || 1,
           2
         );
 
+
       canvas.width =
         rect.width * dpr;
+
 
       canvas.height =
         rect.height * dpr;
 
-      if (gl) {
+
+      if (
+        gl
+      ) {
 
         gl.viewport(
           0,
@@ -1294,7 +2947,9 @@
           canvas.width,
           canvas.height
         );
+
       }
+
     }
 
 
@@ -1305,17 +2960,31 @@
 
 
     const vsSource = `
+
       attribute vec2 a_position;
+
       varying vec2 v_uv;
 
       void main() {
-        v_uv = a_position * 0.5 + 0.5;
-        gl_Position = vec4(a_position, 0.0, 1.0);
+
+        v_uv =
+          a_position * 0.5 +
+          0.5;
+
+        gl_Position =
+          vec4(
+            a_position,
+            0.0,
+            1.0
+          );
+
       }
+
     `;
 
 
     const fsSource = `
+
       precision highp float;
 
       uniform float u_time;
@@ -1324,45 +2993,130 @@
 
       varying vec2 v_uv;
 
-      float random(in vec2 st) {
+
+      float random(
+        in vec2 st
+      ) {
+
         return fract(
           sin(
             dot(
               st.xy,
-              vec2(12.9898, 78.233)
+              vec2(
+                12.9898,
+                78.233
+              )
             )
-          ) * 43758.5453123
+          )
+          *
+          43758.5453123
         );
+
       }
 
-      float noise(in vec2 st) {
 
-        vec2 i = floor(st);
-        vec2 f = fract(st);
+      float noise(
+        in vec2 st
+      ) {
 
-        float a = random(i);
-        float b = random(i + vec2(1.0, 0.0));
-        float c = random(i + vec2(0.0, 1.0));
-        float d = random(i + vec2(1.0, 1.0));
+        vec2 i =
+          floor(st);
+
+        vec2 f =
+          fract(st);
+
+
+        float a =
+          random(i);
+
+        float b =
+          random(
+            i +
+            vec2(
+              1.0,
+              0.0
+            )
+          );
+
+        float c =
+          random(
+            i +
+            vec2(
+              0.0,
+              1.0
+            )
+          );
+
+        float d =
+          random(
+            i +
+            vec2(
+              1.0,
+              1.0
+            )
+          );
+
 
         vec2 u =
-          f * f * (3.0 - 2.0 * f);
+          f *
+          f *
+          (
+            3.0 -
+            2.0 *
+            f
+          );
 
-        return mix(a, b, u.x)
-          + (c - a) * u.y * (1.0 - u.x)
-          + (d - b) * u.x * u.y;
+
+        return
+          mix(
+            a,
+            b,
+            u.x
+          )
+          +
+          (
+            c -
+            a
+          )
+          *
+          u.y
+          *
+          (
+            1.0 -
+            u.x
+          )
+          +
+          (
+            d -
+            b
+          )
+          *
+          u.x
+          *
+          u.y;
+
       }
 
 
       #define NUM_OCTAVES 5
 
-      float fbm(in vec2 _st) {
 
-        float v = 0.0;
-        float a = 0.5;
+      float fbm(
+        in vec2 _st
+      ) {
+
+        float v =
+          0.0;
+
+        float a =
+          0.5;
+
 
         vec2 shift =
-          vec2(100.0);
+          vec2(
+            100.0
+          );
+
 
         mat2 rot =
           mat2(
@@ -1372,22 +3126,36 @@
             cos(0.50)
           );
 
+
         for (
           int i = 0;
           i < NUM_OCTAVES;
           ++i
         ) {
 
-          v += a * noise(_st);
+          v +=
+            a *
+            noise(
+              _st
+            );
+
 
           _st =
-            rot * _st * 2.0 +
+            rot *
+            _st *
+            2.0
+            +
             shift;
 
-          a *= 0.5;
+
+          a *=
+            0.5;
+
         }
 
+
         return v;
+
       }
 
 
@@ -1396,7 +3164,8 @@
         vec2 st =
           (
             gl_FragCoord.xy -
-            0.5 * u_resolution.xy
+            0.5 *
+            u_resolution.xy
           )
           /
           min(
@@ -1404,20 +3173,29 @@
             u_resolution.y
           );
 
+
         float dist =
           length(st);
 
+
         if (
-          dist > 0.495
+          dist >
+          0.495
         ) {
+
           discard;
+
         }
 
+
         float time =
-          u_time * u_speed;
+          u_time *
+          u_speed;
+
 
         vec2 q =
           vec2(
+
             fbm(
               st * 2.2 +
               0.14 * time
@@ -1425,9 +3203,14 @@
 
             fbm(
               st * 2.2 +
-              vec2(1.0, 1.0)
+              vec2(
+                1.0,
+                1.0
+              )
             )
+
           );
+
 
         vec2 r =
           vec2(
@@ -1435,17 +3218,25 @@
             fbm(
               st * 2.2 +
               1.2 * q +
-              vec2(1.7, 9.2) +
+              vec2(
+                1.7,
+                9.2
+              ) +
               0.22 * time
             ),
 
             fbm(
               st * 2.2 +
               1.2 * q +
-              vec2(8.3, 2.8) +
+              vec2(
+                8.3,
+                2.8
+              ) +
               0.16 * time
             )
+
           );
+
 
         float f =
           fbm(
@@ -1461,6 +3252,7 @@
             1.0
           );
 
+
         vec3 neonRed =
           vec3(
             1.0,
@@ -1468,12 +3260,14 @@
             0.22
           );
 
+
         vec3 cyanGlow =
           vec3(
             0.0,
             0.9,
             1.0
           );
+
 
         vec3 magentaPink =
           vec3(
@@ -1490,6 +3284,7 @@
             f
           );
 
+
         vec3 color =
           mix(
             electricBlue,
@@ -1497,33 +3292,43 @@
             mixFactor
           );
 
+
         color =
           mix(
             color,
             cyanGlow,
             clamp(
-              q.x * q.x * 2.2,
+              q.x *
+              q.x *
+              2.2,
               0.0,
               1.0
             )
           );
+
 
         color =
           mix(
             color,
             magentaPink,
             clamp(
-              r.y * r.y * 2.2,
+              r.y *
+              r.y *
+              2.2,
               0.0,
               1.0
             )
           );
 
+
         color =
           pow(
             color,
-            vec3(1.25)
+            vec3(
+              1.25
+            )
           );
+
 
         float alpha =
           smoothstep(
@@ -1532,12 +3337,15 @@
             dist
           );
 
+
         gl_FragColor =
           vec4(
             color,
             alpha
           );
+
       }
+
     `;
 
 
@@ -1552,14 +3360,17 @@
           type
         );
 
+
       gl.shaderSource(
         shader,
         source
       );
 
+
       gl.compileShader(
         shader
       );
+
 
       if (
         !gl.getShaderParameter(
@@ -1574,16 +3385,22 @@
             shader
           )
         );
+
       }
 
+
       return shader;
+
     }
 
 
-    if (gl) {
+    if (
+      gl
+    ) {
 
       const program =
         gl.createProgram();
+
 
       gl.attachShader(
         program,
@@ -1594,6 +3411,7 @@
         )
       );
 
+
       gl.attachShader(
         program,
         createShader(
@@ -1603,9 +3421,11 @@
         )
       );
 
+
       gl.linkProgram(
         program
       );
+
 
       if (
         !gl.getProgramParameter(
@@ -1620,6 +3440,7 @@
             program
           )
         );
+
       }
 
 
@@ -1629,17 +3450,20 @@
           'a_position'
         );
 
+
       const timeLoc =
         gl.getUniformLocation(
           program,
           'u_time'
         );
 
+
       const resLoc =
         gl.getUniformLocation(
           program,
           'u_resolution'
         );
+
 
       const speedLoc =
         gl.getUniformLocation(
@@ -1651,13 +3475,16 @@
       const posBuffer =
         gl.createBuffer();
 
+
       gl.bindBuffer(
         gl.ARRAY_BUFFER,
         posBuffer
       );
 
+
       gl.bufferData(
         gl.ARRAY_BUFFER,
+
         new Float32Array([
           -1, -1,
            1, -1,
@@ -1667,15 +3494,18 @@
            1, -1,
            1,  1
         ]),
+
         gl.STATIC_DRAW
       );
 
 
       resizeCanvas();
 
+
       gl.enable(
         gl.BLEND
       );
+
 
       gl.blendFunc(
         gl.SRC_ALPHA,
@@ -1693,24 +3523,30 @@
           (
             performance.now() -
             startTime
-          ) * 0.001;
+          ) *
+          0.001;
+
 
         gl.clear(
           gl.COLOR_BUFFER_BIT
         );
 
+
         gl.useProgram(
           program
         );
+
 
         gl.enableVertexAttribArray(
           posLoc
         );
 
+
         gl.bindBuffer(
           gl.ARRAY_BUFFER,
           posBuffer
         );
+
 
         gl.vertexAttribPointer(
           posLoc,
@@ -1722,24 +3558,40 @@
         );
 
 
-        let speed = 1.0;
+        let speed =
+          1.0;
+
 
         if (
-          currentState === 'listening'
+          currentState ===
+          'listening'
         ) {
-          speed = 2.5;
+
+          speed =
+            2.5;
+
         }
 
-        if (
-          currentState === 'thinking'
-        ) {
-          speed = 4.0;
-        }
 
         if (
-          currentState === 'speaking'
+          currentState ===
+          'thinking'
         ) {
-          speed = 2.0;
+
+          speed =
+            4.0;
+
+        }
+
+
+        if (
+          currentState ===
+          'speaking'
+        ) {
+
+          speed =
+            2.0;
+
         }
 
 
@@ -1748,10 +3600,12 @@
           currentTime
         );
 
+
         gl.uniform1f(
           speedLoc,
           speed
         );
+
 
         gl.uniform2f(
           resLoc,
@@ -1766,12 +3620,16 @@
           6
         );
 
+
         requestAnimationFrame(
           render
         );
+
       }
 
+
       render();
+
     }
 
 
@@ -1784,4 +3642,5 @@
   </script>
 
 </body>
+
 </html>

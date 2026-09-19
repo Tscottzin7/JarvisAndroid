@@ -21,9 +21,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
-class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateListener {
+class MainActivity : AppCompatActivity(),
+    JarvisForegroundService.ServiceStateListener {
 
     private lateinit var webView: WebView
+
     private var jarvisService: JarvisForegroundService? = null
     private var isServiceBound = false
 
@@ -31,65 +33,89 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
         private const val TAG = "MainActivity"
     }
 
-    private val requestPermissionsLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
+    private val requestPermissionsLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
 
-        val recordAudioGranted =
-            permissions[Manifest.permission.RECORD_AUDIO] ?: false
+            val recordAudioGranted =
+                permissions[Manifest.permission.RECORD_AUDIO] ?: false
 
-        if (recordAudioGranted) {
-            Log.d(TAG, "Permissão RECORD_AUDIO concedida.")
-            startAndBindJarvisService()
-        } else {
-            Log.w(TAG, "Permissão RECORD_AUDIO negada pelo usuário.")
-        }
-    }
+            if (recordAudioGranted) {
 
-    private val serviceConnection = object : ServiceConnection {
+                Log.d(
+                    TAG,
+                    "Permissão RECORD_AUDIO concedida."
+                )
 
-        override fun onServiceConnected(
-            name: ComponentName?,
-            service: IBinder?
-        ) {
-            val binder = service as JarvisForegroundService.LocalBinder
+                startAndBindJarvisService()
 
-            jarvisService = binder.getService()
+            } else {
 
-            jarvisService?.setListener(this@MainActivity)
-
-            isServiceBound = true
-
-            Log.d(
-                TAG,
-                "Conectado com sucesso ao JarvisForegroundService."
-            )
+                Log.w(
+                    TAG,
+                    "Permissão RECORD_AUDIO negada pelo usuário."
+                )
+            }
         }
 
-        override fun onServiceDisconnected(name: ComponentName?) {
+    private val serviceConnection =
+        object : ServiceConnection {
 
-            jarvisService?.setListener(null)
+            override fun onServiceConnected(
+                name: ComponentName?,
+                service: IBinder?
+            ) {
 
-            jarvisService = null
+                val binder =
+                    service as JarvisForegroundService.LocalBinder
 
-            isServiceBound = false
+                jarvisService =
+                    binder.getService()
 
-            Log.w(
-                TAG,
-                "Desconectado do JarvisForegroundService."
-            )
+                jarvisService?.setListener(
+                    this@MainActivity
+                )
+
+                isServiceBound = true
+
+                Log.d(
+                    TAG,
+                    "Conectado com sucesso ao JarvisForegroundService."
+                )
+            }
+
+            override fun onServiceDisconnected(
+                name: ComponentName?
+            ) {
+
+                jarvisService?.setListener(null)
+
+                jarvisService = null
+
+                isServiceBound = false
+
+                Log.w(
+                    TAG,
+                    "Desconectado do JarvisForegroundService."
+                )
+            }
         }
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(
+        savedInstanceState: Bundle?
+    ) {
 
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
+        setContentView(
+            R.layout.activity_main
+        )
 
         enableFullScreen()
 
-        webView = findViewById(R.id.webView)
+        webView =
+            findViewById(R.id.webView)
 
         configureWebView()
 
@@ -98,8 +124,11 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
 
     private fun enableFullScreen() {
 
-        window.statusBarColor = Color.BLACK
-        window.navigationBarColor = Color.BLACK
+        window.statusBarColor =
+            Color.BLACK
+
+        window.navigationBarColor =
+            Color.BLACK
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 
@@ -113,7 +142,8 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
                 )
 
                 controller.systemBarsBehavior =
-                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    WindowInsetsController
+                        .BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
 
         } else {
@@ -155,27 +185,40 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
                 WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
         }
 
-        webView.webViewClient = object : WebViewClient() {
+        webView.webViewClient =
+            object : WebViewClient() {
 
-            override fun onPageFinished(
-                view: WebView?,
-                url: String?
-            ) {
+                override fun onPageFinished(
+                    view: WebView?,
+                    url: String?
+                ) {
 
-                super.onPageFinished(view, url)
+                    super.onPageFinished(
+                        view,
+                        url
+                    )
 
-                Log.d(
-                    TAG,
-                    "WebView index.html carregado."
-                )
+                    Log.d(
+                        TAG,
+                        "WebView index.html carregado."
+                    )
+                }
             }
-        }
 
         /*
          * Ponte JavaScript -> Android
          *
-         * O nome principal usado pelo HTML é AndroidBridge.
+         * O HTML usa:
+         *
+         * window.AndroidBridge
+         *
+         * e também:
+         *
+         * window.Android
+         *
+         * para compatibilidade.
          */
+
         webView.addJavascriptInterface(
 
             AndroidBridge(
@@ -184,7 +227,8 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
 
                     runOnUiThread {
 
-                        jarvisService?.startManualListening()
+                        jarvisService
+                            ?.startManualListening()
                     }
                 },
 
@@ -192,7 +236,16 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
 
                     runOnUiThread {
 
-                        jarvisService?.sendPrompt(promptText)
+                        jarvisService
+                            ?.sendPrompt(promptText)
+                    }
+                },
+
+                onCloseApp = {
+
+                    runOnUiThread {
+
+                        closeJarvisApp()
                     }
                 }
             ),
@@ -200,9 +253,6 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
             "AndroidBridge"
         )
 
-        /*
-         * Compatibilidade com HTMLs que procuram window.Android.
-         */
         webView.addJavascriptInterface(
 
             AndroidBridge(
@@ -211,7 +261,8 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
 
                     runOnUiThread {
 
-                        jarvisService?.startManualListening()
+                        jarvisService
+                            ?.startManualListening()
                     }
                 },
 
@@ -219,7 +270,16 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
 
                     runOnUiThread {
 
-                        jarvisService?.sendPrompt(promptText)
+                        jarvisService
+                            ?.sendPrompt(promptText)
+                    }
+                },
+
+                onCloseApp = {
+
+                    runOnUiThread {
+
+                        closeJarvisApp()
                     }
                 }
             ),
@@ -249,7 +309,10 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
             )
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (
+            Build.VERSION.SDK_INT >=
+            Build.VERSION_CODES.TIRAMISU
+        ) {
 
             if (
                 ContextCompat.checkSelfPermission(
@@ -264,7 +327,9 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
             }
         }
 
-        if (permissionsToRequest.isNotEmpty()) {
+        if (
+            permissionsToRequest.isNotEmpty()
+        ) {
 
             requestPermissionsLauncher.launch(
                 permissionsToRequest.toTypedArray()
@@ -284,13 +349,20 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
                 JarvisForegroundService::class.java
             )
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (
+            Build.VERSION.SDK_INT >=
+            Build.VERSION_CODES.O
+        ) {
 
-            startForegroundService(serviceIntent)
+            startForegroundService(
+                serviceIntent
+            )
 
         } else {
 
-            startService(serviceIntent)
+            startService(
+                serviceIntent
+            )
         }
 
         bindService(
@@ -298,6 +370,54 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
             serviceConnection,
             Context.BIND_AUTO_CREATE
         )
+    }
+
+    /*
+     * Fecha o aplicativo através do botão X
+     * da interface HTML.
+     *
+     * Primeiro remove o listener e desvincula
+     * o Activity do serviço. Depois fecha a
+     * Activity e remove a tarefa do sistema.
+     */
+    private fun closeJarvisApp() {
+
+        Log.d(
+            TAG,
+            "Fechando aplicativo pelo botão X."
+        )
+
+        try {
+
+            webView.stopLoading()
+
+        } catch (_: Exception) {
+        }
+
+        try {
+
+            if (isServiceBound) {
+
+                jarvisService?.setListener(null)
+
+                unbindService(
+                    serviceConnection
+                )
+
+                isServiceBound = false
+            }
+
+        } catch (e: Exception) {
+
+            Log.w(
+                TAG,
+                "Erro ao desvincular serviço: ${e.message}"
+            )
+        }
+
+        jarvisService = null
+
+        finishAndRemoveTask()
     }
 
     override fun onJarvisStateChanged(
@@ -308,10 +428,14 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
         runOnUiThread {
 
             val safeState =
-                org.json.JSONObject.quote(state)
+                org.json.JSONObject.quote(
+                    state
+                )
 
             val safeText =
-                org.json.JSONObject.quote(text)
+                org.json.JSONObject.quote(
+                    text
+                )
 
             val jsCommand =
                 """
@@ -330,19 +454,35 @@ class MainActivity : AppCompatActivity(), JarvisForegroundService.ServiceStateLi
     override fun onConnectionStatusChanged(
         isConnected: Boolean
     ) {
-        // Estado de conexão pode ser usado futuramente pela interface.
+
+        // Estado de conexão pode ser usado
+        // futuramente pela interface.
     }
 
     override fun onDestroy() {
 
-        if (isServiceBound) {
+        try {
 
-            unbindService(
-                serviceConnection
+            if (isServiceBound) {
+
+                jarvisService?.setListener(null)
+
+                unbindService(
+                    serviceConnection
+                )
+
+                isServiceBound = false
+            }
+
+        } catch (e: Exception) {
+
+            Log.w(
+                TAG,
+                "Erro ao desvincular serviço no onDestroy: ${e.message}"
             )
-
-            isServiceBound = false
         }
+
+        jarvisService = null
 
         super.onDestroy()
     }
