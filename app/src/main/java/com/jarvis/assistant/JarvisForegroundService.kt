@@ -13,12 +13,15 @@ import android.media.ToneGenerator
 import android.os.Binder
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Locale
 
@@ -28,7 +31,6 @@ class JarvisForegroundService :
     TextToSpeech.OnInitListener {
 
     interface ServiceStateListener {
-
         fun onJarvisStateChanged(
             state: String,
             text: String
@@ -52,13 +54,19 @@ class JarvisForegroundService :
     private var currentState = "idle"
 
     // ============================================================
-    // TTS NATIVO DO ANDROID
+    // ANDROID ACTIONS
+    // ============================================================
+
+    private lateinit var androidActions: AndroidActions
+
+    private val actionHandler = Handler(Looper.getMainLooper())
+
+    // ============================================================
+    // TTS NATIVO
     // ============================================================
 
     private var textToSpeech: TextToSpeech? = null
-
     private var ttsReady = false
-
     private var pendingSpeechText: String? = null
 
     private val ttsUtteranceId = "jarvis_response"
@@ -67,9 +75,7 @@ class JarvisForegroundService :
         "SUA_ACCESS_KEY_AQUI"
 
     companion object {
-
-        private const val TAG =
-            "JarvisService"
+        private const val TAG = "JarvisService"
 
         private const val CHANNEL_ID =
             "jarvis_service_channel"
@@ -87,7 +93,6 @@ class JarvisForegroundService :
     // ============================================================
 
     inner class LocalBinder : Binder() {
-
         fun getService():
             JarvisForegroundService =
             this@JarvisForegroundService
@@ -96,7 +101,6 @@ class JarvisForegroundService :
     override fun onBind(
         intent: Intent?
     ): IBinder {
-
         return binder
     }
 
@@ -115,6 +119,9 @@ class JarvisForegroundService :
             "Iniciando JarvisForegroundService..."
         )
 
+        androidActions =
+            AndroidActions(this)
+
         acquireWakeLock()
 
         createNotificationChannel()
@@ -122,7 +129,7 @@ class JarvisForegroundService :
         startForegroundServiceWithNotification()
 
         // --------------------------------------------------------
-        // TTS NATIVO
+        // TTS
         // --------------------------------------------------------
 
         textToSpeech =
@@ -168,10 +175,6 @@ class JarvisForegroundService :
                         recognizedText
                     )
 
-                    /*
-                     * Depois que o comando foi reconhecido,
-                     * a wake word volta a ficar disponível.
-                     */
                     wakeWordManager.start()
                 },
 
@@ -193,7 +196,6 @@ class JarvisForegroundService :
                 onStateChange = { isListening ->
 
                     if (isListening) {
-
                         updateState(
                             "listening"
                         )
@@ -240,7 +242,6 @@ class JarvisForegroundService :
         flags: Int,
         startId: Int
     ): Int {
-
         return START_STICKY
     }
 
@@ -311,8 +312,10 @@ class JarvisForegroundService :
             )
 
         if (
-            result == TextToSpeech.LANG_MISSING_DATA ||
-            result == TextToSpeech.LANG_NOT_SUPPORTED
+            result ==
+            TextToSpeech.LANG_MISSING_DATA ||
+            result ==
+            TextToSpeech.LANG_NOT_SUPPORTED
         ) {
 
             Log.e(
@@ -417,8 +420,6 @@ class JarvisForegroundService :
             "Android TTS pronto."
         )
 
-        // Se alguma resposta chegou antes do TTS terminar
-        // de inicializar, fala agora.
         pendingSpeechText?.let {
 
             pendingSpeechText = null
@@ -497,9 +498,7 @@ class JarvisForegroundService :
     ) {
 
         val cleanText =
-            cleanTextForSpeech(
-                text
-            )
+            cleanTextForSpeech(text)
 
         if (cleanText.isBlank()) {
 
@@ -569,6 +568,268 @@ class JarvisForegroundService :
         updateState(
             "idle"
         )
+    }
+
+    // ============================================================
+    // EXECUÇÃO DE AÇÃO ÚNICA
+    // ============================================================
+
+    private fun executeAndroidAction(
+        actionObject: JSONObject
+    ) {
+
+        try {
+
+            val action =
+                actionObject.optString(
+                    "action",
+                    ""
+                )
+
+            val paramsObject =
+                actionObject.optJSONObject(
+                    "params"
+                )
+
+            val params =
+                jsonObjectToMap(
+                    paramsObject
+                )
+
+            if (action.isBlank()) {
+
+                Log.w(
+                    TAG,
+                    "Ação Android vazia."
+                )
+
+                return
+            }
+
+            Log.d(
+                TAG,
+                "Executando Android action: $action | $params"
+            )
+
+            val success =
+                androidActions.executeAction(
+                    action,
+                    params
+                )
+
+            Log.d(
+                TAG,
+                "Resultado da ação '$action': $success"
+            )
+
+        } catch (e: Exception) {
+
+            Log.e(
+                TAG,
+                "Erro executando ação Android: ${e.message}",
+                e
+            )
+        }
+    }
+
+    // ============================================================
+    // EXECUÇÃO DE SEQUÊNCIA
+    // ============================================================
+
+    private fun executeAndroidSequence(
+        commands: JSONArray
+    ) {
+
+        Log.d(
+            TAG,
+            "Executando sequência Android com ${commands.length()} comandos."
+        )
+
+        executeSequenceStep(
+            commands,
+            0
+        )
+    }
+
+    private fun executeSequenceStep(
+        commands: JSONArray,
+        index: Int
+    ) {
+
+        if (index >= commands.length()) {
+
+            Log.d(
+                TAG,
+                "Sequência Android concluída."
+            )
+
+            return
+        }
+
+        try {
+
+            val command =
+                commands.optJSONObject(index)
+
+            if (command == null) {
+
+                executeSequenceStep(
+                    commands,
+                    index + 1
+                )
+
+                return
+            }
+
+            val delay =
+                command.optLong(
+                    "delay",
+                    if (index == 0) 0L else 700L
+                )
+
+            actionHandler.postDelayed({
+
+                executeAndroidAction(
+                    command
+                )
+
+                executeSequenceStep(
+                    commands,
+                    index + 1
+                )
+
+            }, delay)
+
+        } catch (e: Exception) {
+
+            Log.e(
+                TAG,
+                "Erro na sequência Android: ${e.message}",
+                e
+            )
+
+            executeSequenceStep(
+                commands,
+                index + 1
+            )
+        }
+    }
+
+    // ============================================================
+    // JSON OBJECT -> MAP
+    // ============================================================
+
+    private fun jsonObjectToMap(
+        json: JSONObject?
+    ): Map<String, Any> {
+
+        if (json == null) {
+            return emptyMap()
+        }
+
+        val map =
+            mutableMapOf<String, Any>()
+
+        val keys =
+            json.keys()
+
+        while (keys.hasNext()) {
+
+            val key =
+                keys.next()
+
+            val value =
+                json.get(key)
+
+            if (
+                value != JSONObject.NULL
+            ) {
+                map[key] = value
+            }
+        }
+
+        return map
+    }
+
+    // ============================================================
+    // PROCESSAR EXECUTE_ACTION
+    // ============================================================
+
+    private fun handleExecuteAction(
+        json: JSONObject
+    ) {
+
+        try {
+
+            val payload =
+                json.optJSONObject(
+                    "payload"
+                )
+
+            if (payload == null) {
+
+                Log.w(
+                    TAG,
+                    "execute_action sem payload."
+                )
+
+                return
+            }
+
+            val target =
+                payload.optString(
+                    "target",
+                    "android"
+                )
+
+            when (target) {
+
+                "android" -> {
+
+                    executeAndroidAction(
+                        payload
+                    )
+                }
+
+                "android_sequence" -> {
+
+                    val commands =
+                        payload.optJSONArray(
+                            "commands"
+                        )
+
+                    if (commands == null) {
+
+                        Log.w(
+                            TAG,
+                            "android_sequence sem commands."
+                        )
+
+                        return
+                    }
+
+                    executeAndroidSequence(
+                        commands
+                    )
+                }
+
+                else -> {
+
+                    Log.w(
+                        TAG,
+                        "Target Android desconhecido: $target"
+                    )
+                }
+            }
+
+        } catch (e: Exception) {
+
+            Log.e(
+                TAG,
+                "Erro processando execute_action: ${e.message}",
+                e
+            )
+        }
     }
 
     // ============================================================
@@ -688,77 +949,110 @@ class JarvisForegroundService :
 
         try {
 
+            Log.d(
+                TAG,
+                "Mensagem recebida do Python: $message"
+            )
+
             val json =
                 JSONObject(
                     message
                 )
 
-            if (
-                json.has("type") &&
-                json.getString("type") == "state"
-            ) {
+            val type =
+                json.optString(
+                    "type",
+                    ""
+                )
 
-                val state =
-                    json.optString(
-                        "state",
-                        "idle"
-                    )
+            when (type) {
 
-                val text =
-                    json.optString(
-                        "text",
-                        ""
-                    )
+                // ------------------------------------------------
+                // ESTADO
+                // ------------------------------------------------
 
-                when (state) {
+                "state" -> {
 
-                    "speaking" -> {
+                    val state =
+                        json.optString(
+                            "state",
+                            "idle"
+                        )
 
-                        if (
-                            text.isNotBlank()
-                        ) {
+                    val text =
+                        json.optString(
+                            "text",
+                            ""
+                        )
 
-                            speakText(
+                    when (state) {
+
+                        "speaking" -> {
+
+                            if (
+                                text.isNotBlank()
+                            ) {
+
+                                speakText(
+                                    text
+                                )
+                            }
+                        }
+
+                        "thinking" -> {
+
+                            updateState(
+                                "thinking",
+                                text
+                            )
+                        }
+
+                        "listening" -> {
+
+                            updateState(
+                                "listening",
+                                text
+                            )
+                        }
+
+                        "idle" -> {
+
+                            /*
+                             * O Python não interrompe
+                             * o TTS Android com idle.
+                             *
+                             * O próprio TTS muda para idle
+                             * quando terminar.
+                             */
+                        }
+
+                        else -> {
+
+                            updateState(
+                                state,
                                 text
                             )
                         }
                     }
+                }
 
-                    "thinking" -> {
+                // ------------------------------------------------
+                // EXECUTE ACTION
+                // ------------------------------------------------
 
-                        updateState(
-                            "thinking",
-                            text
-                        )
-                    }
+                "execute_action" -> {
 
-                    "listening" -> {
+                    handleExecuteAction(
+                        json
+                    )
+                }
 
-                        updateState(
-                            "listening",
-                            text
-                        )
-                    }
+                else -> {
 
-                    "idle" -> {
-
-                        /*
-                         * O Python não deve interromper
-                         * o TTS Android mandando idle.
-                         *
-                         * O próprio UtteranceProgressListener
-                         * coloca o estado em idle quando
-                         * a fala realmente terminar.
-                         */
-                    }
-
-                    else -> {
-
-                        updateState(
-                            state,
-                            text
-                        )
-                    }
+                    Log.d(
+                        TAG,
+                        "Tipo de mensagem não tratado: $type"
+                    )
                 }
             }
 
@@ -954,6 +1248,10 @@ class JarvisForegroundService :
         Log.d(
             TAG,
             "Encerrando JarvisForegroundService..."
+        )
+
+        actionHandler.removeCallbacksAndMessages(
+            null
         )
 
         try {
